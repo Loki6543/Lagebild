@@ -1,0 +1,2013 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Zobiris Lagebild</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app shell. Sticky command bar with Refresh, four tabs, single column cards that widen to two columns on desktop. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunk:#e9edf2; --fg:#141922; --muted:#5a6273; --line:#dce1e8;
+  --accent:#2457c5; --onaccent:#ffffff;
+  --stock:#2e6bd6; --gold:#b98512; --crypto:#7b4fd1; --cash:#6f7888;
+  --good:#1d8656; --warn:#b8730a; --bad:#c03b35;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1118; --surface:#161c26; --sunk:#1d2430; --fg:#e6e9ef; --muted:#9aa3b4; --line:#2a3240;
+  --accent:#6f9cf2; --onaccent:#0d1118;
+  --stock:#6a9cf0; --gold:#e0b04a; --crypto:#a988ee; --cash:#9aa3b4;
+  --good:#47bd86; --warn:#e3a13a; --bad:#ee6b64; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1118; --surface:#161c26; --sunk:#1d2430; --fg:#e6e9ef; --muted:#9aa3b4; --line:#2a3240;
+  --accent:#6f9cf2; --onaccent:#0d1118;
+  --stock:#6a9cf0; --gold:#e0b04a; --crypto:#a988ee; --cash:#9aa3b4;
+  --good:#47bd86; --warn:#e3a13a; --bad:#ee6b64; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:880px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h2{font-size:19px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* command bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .inner{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1}
+.brand h1{font-size:21px;font-weight:700;letter-spacing:.01em}
+.brand .status{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button{font:inherit}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:9px;padding:10px 16px;background:var(--accent);color:var(--onaccent);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.ghost{background:var(--sunk);color:var(--fg)}
+.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.tabs{display:flex;gap:4px;padding-bottom:8px;overflow-x:auto}
+.tab{border:0;background:transparent;color:var(--muted);padding:7px 12px;border-radius:7px;font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--sunk);color:var(--fg)}
+main{padding-top:16px}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card.span{grid-column:1/-1}
+.cardhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+/* posture */
+.posture{display:flex;flex-direction:column;gap:6px}
+.posture .de{font-family:var(--display);font-size:28px;font-weight:700;line-height:1.05}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid currentColor;width:max-content}
+.badge.good{color:var(--good)}.badge.warn{color:var(--warn)}.badge.bad{color:var(--bad)}.badge.info{color:var(--accent)}.badge.mute{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+/* progress */
+.steps{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.step{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);justify-self:center}
+.dot.run{background:var(--accent)}.dot.ok{background:var(--good)}.dot.stale{background:var(--warn)}.dot.fail{background:var(--bad)}
+/* allocation */
+.allocbar{display:flex;height:30px;border-radius:7px;overflow:hidden;background:var(--sunk)}
+.allocbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:11.5px;font-weight:500;min-width:0;overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.r,th.r{text-align:right}
+.tick{font-family:var(--mono);font-weight:500}
+.sub{display:block;font-size:12px;color:var(--muted)}
+.act{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:5px;font-weight:500}
+.act.Add{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.act.Trim{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.act.Hold{background:var(--sunk);color:var(--muted)}
+.zbar{position:relative;height:6px;width:64px;background:var(--sunk);border-radius:3px;display:inline-block;vertical-align:middle;margin-top:4px}
+.zbar i{position:absolute;top:0;bottom:0;border-radius:3px}
+.zbar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
+tr.sl td{font-family:var(--display);font-weight:700;font-size:14px;padding-top:12px}
+@media (max-width:420px){.hide-sm{display:none}}
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.tile{background:var(--sunk);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .v{font-family:var(--mono);font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
+.tile .k{font-size:12px;color:var(--muted)}
+.meter{display:grid;grid-template-columns:72px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.track{height:10px;background:var(--sunk);border-radius:5px;position:relative;overflow:hidden}
+.track i{position:absolute;top:0;bottom:0;border-radius:5px}
+.track .cap{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--fg);opacity:.5}
+.center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted)}
+/* heatmap */
+.hm{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:10.5px;width:auto}
+.hm td,.hm th{padding:0;border:0;text-align:center;width:26px;height:24px}
+.hm th{color:var(--muted);font-weight:500;font-size:10px;text-transform:none;letter-spacing:0}
+.hm td{border-radius:3px;color:var(--fg)}
+.notes{display:flex;flex-direction:column;gap:6px;padding-left:18px;margin:0;font-size:14px}
+.brief{white-space:pre-wrap;font-size:14.5px;line-height:1.55;background:var(--sunk);border-radius:9px;padding:12px;min-height:44px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
+.formula{font-family:var(--mono);font-size:13px;background:var(--sunk);border-radius:9px;padding:12px;overflow-x:auto;white-space:pre;line-height:1.6}
+.prose{display:flex;flex-direction:column;gap:10px;max-width:66ch;font-size:14.5px}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:14px;font-size:14px;color:var(--muted)}
+.disc{font-size:12.5px;color:var(--muted)}
+[role="tabpanel"]{display:flex;flex-direction:column;gap:14px}
+[role="tabpanel"][hidden],[hidden]{display:none!important}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+select{font:inherit;font-size:13.5px;background:var(--sunk);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+.gauge{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,color-mix(in srgb,var(--bad) 55%,var(--sunk)) 0 20%,color-mix(in srgb,var(--warn) 45%,var(--sunk)) 20% 50%,color-mix(in srgb,var(--good) 40%,var(--sunk)) 50% 100%)}
+.gauge .pin{position:absolute;top:-4px;width:4px;height:22px;border-radius:2px;background:var(--fg);transform:translateX(-2px)}
+.gauge-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.lens td.r,.lens th.r{text-align:right}
+.lens td:first-child{color:var(--muted)}
+.lens .hl{font-weight:600;color:var(--fg)}
+.blendout{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.checks{display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.checks .row{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:baseline}
+.checks .ic{font-family:var(--mono);font-weight:600}
+.checks .ic.ok{color:var(--good)}.checks .ic.bad{color:var(--bad)}.checks .ic.rel{color:var(--warn)}
+details.more summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"▸ ";}
+details.more[open] summary::before{content:"▾ ";}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.hgrid label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.hgrid input{font:inherit;font-family:var(--mono);font-size:14px;background:var(--sunk);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 8px;width:100%;min-width:0}
+.hgrid input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.sw-row{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.sw-row:first-of-type{border-top:0}
+.sw-row input[type="checkbox"]{width:22px;height:22px;accent-color:var(--accent);margin:2px 0 0}
+.sw-row .t{font-weight:600;font-size:14.5px}
+.sw-row .d{grid-column:2;font-size:13px;color:var(--muted)}
+.cmp td.r,.cmp th.r{text-align:right}
+.cmp tr.me td{font-weight:600}
+.usd{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.fsteps{display:flex;flex-direction:column;gap:10px}
+.fstep{background:var(--sunk);border-radius:9px;padding:10px 12px}
+.fstep h4{margin:0 0 4px;font-family:var(--display);font-size:14.5px}
+.fstep pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.tabs{flex-wrap:wrap}
+@media (max-width:420px){
+  .tab{padding:6px 7px;font-size:13px}
+  .fstep pre{font-size:11.5px}
+  th,td{padding:8px 4px}
+  .lens th,.lens td{padding:6px 2px;font-size:12px}
+  .lens th{font-size:9.5px;letter-spacing:.02em}
+  .hm td,.hm th{width:22px;height:22px;font-size:9px}
+  .hm th{font-size:8.5px}
+  .cmp th,.cmp td{font-size:12.5px;padding:7px 3px}
+}
+.why{display:block;font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.act.Blocked{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.act.Hist{background:var(--sunk);color:var(--warn)}
+.card.blocked{border:2px solid var(--bad)}
+.dq{display:flex;flex-direction:column;gap:7px;font-size:13.5px}
+.dq .row{display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:baseline}
+.dq .row > span{min-width:0;overflow-wrap:anywhere}
+.q{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:5px;text-align:center;border:1px solid currentColor}
+.q.observed{color:var(--good)}.q.delayed{color:var(--warn)}.q.proxy{color:var(--accent)}.q.inconsistent,.q.missing{color:var(--bad)}.q.missing.opt{color:var(--warn)}
+@media (max-width:420px){.dq .row{grid-template-columns:92px 1fr}}
+</style>
+
+<header class="bar">
+  <div class="wrap"><div class="inner">
+    <div class="brand">
+      <h1>Zobiris Lagebild</h1>
+      <span class="status" id="statusLine">Base plan · tap Refresh for this week's read</span>
+    </div>
+    <button class="btn" id="refreshBtn" type="button"><span id="refreshIcon" aria-hidden="true">↻</span><span id="refreshLabel">Refresh</span></button>
+  </div></div>
+  <div class="wrap"><div class="inner tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="t-lage" aria-controls="p-lage" aria-selected="true">Lagebild</button>
+    <button class="tab" role="tab" id="t-hold" aria-controls="p-hold" aria-selected="false">Holdings</button>
+    <button class="tab" role="tab" id="t-hist" aria-controls="p-hist" aria-selected="false">History</button>
+    <button class="tab" role="tab" id="t-form" aria-controls="p-form" aria-selected="false">Formula</button>
+    <button class="tab" role="tab" id="t-plan" aria-controls="p-plan" aria-selected="false">Plan</button>
+  </div></div>
+</header>
+
+<main class="wrap"><div class="inner">
+
+<section role="tabpanel" id="p-lage" aria-labelledby="t-lage">
+  <div class="card" id="progressCard" hidden>
+    <div class="cardhead"><h2>Pulling live data</h2><span class="muted small num" id="progressTimer"></span></div>
+    <div class="steps" id="steps"></div>
+    <p class="small muted">Twelve Data's free plan allows 8 calls a minute, so the 8 ETF series are paced. A full refresh takes about a minute. ETF closes saved after the last market close and crypto prices saved in the last hour are reused, so a repeat refresh makes fewer calls.</p>
+  </div>
+
+  <div class="card blocked" id="blockedCard" hidden>
+    <div class="cardhead"><h2>No actionable targets</h2><span class="badge bad" id="blockedWhen"></span></div>
+    <p class="small">The latest refresh failed closed: a required input or check did not pass, so it gives no Add or Trim.</p>
+    <ul class="notes" id="blockedList"></ul>
+    <p class="small muted" id="blockedHist"></p>
+  </div>
+
+  <div class="card">
+    <div class="posture">
+      <span class="eyebrow" id="postureEyebrow">Current posture</span>
+      <span class="de" id="postureDe">Basis</span>
+      <span id="postureEn" class="muted">The medium plus base plan: stocks 56, gold 24, crypto 20. Refresh to let the formula read the market.</span>
+      <div class="chips" id="postureChips"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Target allocation</h2><span class="small muted" id="allocRef">vs base plan</span></div>
+    <div class="allocbar" id="allocBar" role="img" aria-label="Sleeve allocation"></div>
+    <div class="legend" id="allocLegend"></div>
+    <div class="tw"><table id="holdTable">
+      <thead><tr><th>Holding</th><th class="r hide-sm">Base</th><th class="r">Target</th><th class="r">Change</th><th class="r">Action</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="small muted" id="allocFoot">Change is measured against your entered holdings when you have saved them, otherwise against your last run. Moves inside the band (1.5 points or 20% of the position) read as Hold, except reductions forced by a gate or risk limit, which always read as Trim.</p>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Constraint check</h2><span id="checkBadge" class="badge mute">not run</span></div>
+    <div id="checkBox" class="empty">Every limit is verified on the final weights after each refresh.</div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Data quality</h2><span id="dqBadge" class="badge mute">not run</span></div>
+    <div id="dqBox" class="empty">After each refresh, every input is listed with its source, observation date and quality: observed, delayed, missing, inconsistent or proxy.</div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Gates</h2>
+      <div id="gateBox" class="empty">Gate status appears after the first refresh.</div>
+    </div>
+    <div class="card">
+      <h2>Risk check</h2>
+      <div id="riskBox" class="empty">Risk is measured from live prices after the first refresh.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Risk-budget lens</h2><span class="small muted">what other rules would hold today</span></div>
+    <div id="lensBox" class="empty">After the first refresh, this compares your allocation with the same formula without macro, an equal-risk portfolio and a cluster risk parity portfolio.</div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Macro and sentiment</h2><span class="small muted">scores run from −1 to +1</span></div>
+    <div id="macroBox" class="empty">Yields, real yields, Fed policy, crypto regime and leverage appear after the first refresh.</div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Correlations</h2><span class="small muted" id="corrWin">63 trading days</span></div>
+    <div class="tw" id="corrBox"><div class="empty">The correlation grid is computed from daily returns after the first refresh.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>What the engine did</h2>
+    <ul class="notes" id="notesList"><li class="muted">No run yet.</li></ul>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>Briefing</h2><button class="btn ghost" id="explainBtn" type="button">Explain this Lagebild</button></div>
+    <div class="brief muted" id="briefBox">Claude writes a short plain-English briefing of the current run when you tap the button.</div>
+  </div>
+</section>
+
+<section role="tabpanel" id="p-hold" aria-labelledby="t-hold" hidden>
+  <div class="card">
+    <div class="cardhead"><h2>Your holdings</h2><span class="small muted" id="holdStamp">optional</span></div>
+    <p class="small">Enter how many shares or coins you hold. Each refresh values them at the live prices it pulls, so Add and Trim compare the target with what you actually own, and dollar amounts appear next to each action. Leave a field empty for zero.</p>
+    <div class="hgrid" id="holdGrid"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="holdSave" type="button">Save holdings</button>
+      <button class="btn ghost" id="holdClear" type="button">Clear</button>
+      <span class="small muted num" id="holdMsg"></span>
+    </div>
+    <p class="small muted">Stored with this app's saved runs, visible to anyone you share the app with. Nothing is sent to a broker and no trade is placed.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Policy switches</h2><span class="small muted">apply at the next Refresh</span></div>
+    <div id="policyBox">
+      <div class="sw-row"><input type="checkbox" id="pol-dd"><label for="pol-dd" class="t">Drawdown overlay</label>
+        <span class="d">Scales every holding down once the base plan is more than 10% below its one-year peak, to a 50% floor at 30%. In the 2021 to 2026 replay it cut the worst drawdown from 29% to 24% at the same risk-adjusted return, but it held 11% cash on average, raised turnover from 92% to 132% a year and sold into the April 2025 dip (2025 return 34% instead of 37%). Turn it on if a 30% drop would make you sell anyway.</span></div>
+      <div class="sw-row"><input type="checkbox" id="pol-alt"><label for="pol-alt" class="t">Alt trend gate</label>
+        <span class="d">Halves ETH, SOL or LINK when it trades below a falling 210-day average. Replay: certainty-equivalent return fell from 20.2% to 19.0% and 2025 dropped from 37% to 31%, with no drawdown benefit, so it is off by default.</span></div>
+      <div class="sw-row"><input type="checkbox" id="pol-graded"><label for="pol-graded" class="t">Trend-distance gate</label>
+        <span class="d">Trims alts, then exits alts and half of BTC, when BTC sits far below its 210-day average in units of 30-day volatility. Replay: no drawdown benefit, turnover 92% to 107% a year, certainty-equivalent 20.2% to 19.6%. Its reading is shown either way.</span></div>
+    </div>
+    <p class="small muted" id="policyMsg">Always on: the monthly BTC gate, BTC at most 10%, sleeve limits, NVDA look-through at most 10%, crypto at most 60% of risk and volatility at most 24%.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Connector access</h2><span class="small muted num" id="accessSum"></span></div>
+    <p class="small">Refresh asks once, in a single dialog, for every connector this app reads. Choose Allow there and later refreshes run without prompts.</p>
+    <div class="dq" id="accessList"><p class="small muted">Reading permissions…</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="accessAllow" type="button">Allow all connectors</button>
+      <button class="btn ghost" id="accessManage" type="button">Open permissions</button>
+      <span class="small muted" id="accessMsg"></span>
+    </div>
+    <p class="small muted">If a prompt still appears on every call after you allow a connector, that tool is set to ask each time in its tool permissions under claude.ai Settings → Connectors. Every tool listed here only reads data, so setting it to always allow there stops the prompts. Nothing in this app can place a trade.</p>
+  </div>
+</section>
+
+<section role="tabpanel" id="p-hist" aria-labelledby="t-hist" hidden>
+  <div class="card">
+    <div class="cardhead"><h2>Sleeve weights over time</h2><span class="small muted" id="histCount"></span></div>
+    <div class="chart" id="histSleeve"><div class="empty">Every refresh is saved here, so this chart fills in week by week.</div></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--stock)"></i>Stocks</span>
+      <span><i class="sw" style="background:var(--gold)"></i>Gold</span>
+      <span><i class="sw" style="background:var(--crypto)"></i>Crypto</span>
+      <span><i class="sw" style="background:var(--cash)"></i>To interest accounts</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Correlation memory</h2><span class="small muted">63-day correlation at each run</span></div>
+    <div class="chart" id="histCorr"><div class="empty">Tracks whether your hedges still hedge: BTC vs gold, BTC vs S&amp;P 500, gold vs S&amp;P 500.</div></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--crypto)"></i>BTC · Gold</span>
+      <span><i class="sw" style="background:var(--stock)"></i>BTC · S&amp;P 500</span>
+      <span><i class="sw" style="background:var(--gold)"></i>Gold · S&amp;P 500</span>
+      <span><i class="sw" style="background:var(--bad)"></i>Avg risk-asset correlation (EWMA)</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Run log</h2>
+    <div class="tw"><table id="runTable"><thead><tr><th>Run</th><th class="hide-sm">Posture</th><th class="r">Crypto</th><th class="r">Cash</th><th class="r hide-sm">Vol</th><th class="r">BTC gate</th><th class="r">Status</th></tr></thead><tbody><tr><td colspan="7" class="muted">No runs saved yet.</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<section role="tabpanel" id="p-form" aria-labelledby="t-form" hidden>
+  <div class="card prose">
+    <h2>The formula, version 3.1</h2>
+    <p>Version 3 answers the October 16 formula review and a weekly replay of the engine from February 2021 to October 2026. Version 3.1 adds the operating rules of the October 16 technical whitepaper: a record and a quality state for every input, and a run that fails closed. After the sleeve projection only the ballast step can raise a holding (VOO and gold, up to their sleeve ceilings); every later step lowers holdings or moves money to cash. The final weights are checked against every limit on each refresh, and a failed check blocks the run.</p>
+<div class="fsteps"><div class="fstep"><h4>1 · Signal</h4><pre>S = ½·T + ½·M
+  (both in volatility units)
+Trend
+  T = clamp(ln(P ÷ A) ÷ (σe·√H))
+  stocks, gold: A = 200-day average,
+  H = 63/252
+  crypto: A = 70 three-day bars
+  (210 days), H = 90/365
+Momentum
+  M = clamp(ln(P 21 days ago ÷
+  P 126 days ago) ÷ (σe·√h))
+  h = 105/252 stocks,
+  105/365 crypto
+σe = max(63-day vol,
+  ½ × default vol)</pre></div><div class="fstep"><h4>2 · Macro</h4><pre>stocks = 0.3·(−Δ10y 3m ÷ 0.5)
+  + 0.3·level + 0.15·Fed + 0.25·semis
+gold = 0.55·(−Δ real yield 3m ÷ 0.5)
+  + 0.3·Fed − 0.15·semis
+  real yield: 10-year TIPS
+  (FRED DFII10), fallback 10y − CPI
+crypto = 0.6·RSPS regime + 0.4·leverage
+  leverage: open interest 30d
+  minus market cap 30d
+Fed = clamp(−E[Δrate] ÷ 0.25),
+  next FOMC only (CME FedWatch)
+Missing parts count as 0; nothing
+is reweighted.</pre></div><div class="fstep"><h4>3 · Tilt</h4><pre>z = 0.8·S + 0.2·macro
+  (z = 0 when the signal is missing)
+p = base · e^(0.2·z),
+  scaled to 100</pre></div><div class="fstep"><h4>4 · Smoothing</h4><pre>p = ½·p + ½·p of the run
+  3 to 21 days old, before any limit</pre></div><div class="fstep"><h4>5 · Sleeves</h4><pre>exact projection:
+stocks 51–61, gold 19–29, crypto 15–20</pre></div><div class="fstep"><h4>6 · Limits</h4><pre>one upper bound per holding,
+the tightest wins
+BTC ≤ 10 → excess to ballast
+NVDA look-through ≤ 10: move
+  (L − 10) ÷ 0.92 of NVDA into VOO
+ballast VOO 60 / gold 40, only up to
+  the sleeve ceilings, rest to cash
+BTC month-end close below
+  its 10-month average
+  → alts 0, BTC ≤ ½·min(p, 10),
+  proceeds to cash
+switches: alt trend gate (alt ≤ ½·p),
+  trend-distance gate</pre></div><div class="fstep"><h4>7 · Crypto risk</h4><pre>share ≤ 60% (50% in a correlation
+  spike), base and EWMA models
+a* = min(1, positive root of
+  (1−q)A·a² + (1−2q)B·a − qC)
+A = kᵀΣk, B = kᵀΣn, C = nᵀΣn
+crypto × a*, rest to cash</pre></div><div class="fstep"><h4>8 · Volatility</h4><pre>s = min(1, 24% ÷ σ(w))
+every holding × s, rest to cash</pre></div><div class="fstep"><h4>9 · Switch</h4><pre>drawdown overlay:
+  m = 1 if D ≤ 10%, else
+  max(0.5, 1 − ½·(D − 10%) ÷ 20%)</pre></div><div class="fstep"><h4>10 · Check</h4><pre>every limit verified on the final
+weights</pre></div><div class="fstep"><h4>11 · Actions</h4><pre>against marked holdings, else the
+  last run: Add or Trim beyond
+  max(1.5 pts, 20% of position);
+  forced trims are never held back</pre></div><div class="fstep"><h4>12 · Status</h4><pre>valid: every input observed,
+  every check passes
+degraded: an optional input is
+  missing, delayed or a proxy; it
+  counts as 0 or is labeled, and the
+  targets stay actionable
+invalid: a price series, the BTC
+  month-end closes, the risk model or
+  a final check is missing or fails
+  → no actionable targets; the last
+  valid run stays visible as history</pre></div><div class="fstep"><h4>Risk model</h4><pre>Σ = D·R·D
+D = long-window volatility
+  (252 days stocks, 300 days crypto)
+R = (1−δ)·R_EWMA(λ 0.94) + δ·r̄
+  δ: Ledoit–Wolf intensity toward
+  the average correlation, kept in
+  [0.25, 0.75]; repaired to the
+  nearest valid correlation matrix
+EWMA model: second check for the
+  crypto risk cap
+shown only: 63-day sample,
+  stress at ρ = 0.8</pre></div></div>
+
+    <h3>What the review changed</h3>
+    <ul>
+      <li><b>Adopted as correctness fixes:</b> final limits enforced once and checked (the old order let ballast transfers and smoothing break earlier caps); the NVDA transfer divided by 0.92; Fed odds from the next meeting only; smoothing moved before the limits; gates turned into upper bounds so halvings never multiply; the crypto risk repair replaced by the review's closed form, verified on 10,000 random cases with zero failures.</li>
+      <li><b>Adopted as better estimates:</b> trend and momentum in volatility units with log returns, so a 10% gap means more for gold than for SOL; long-window volatilities with shrunk, valid correlations; the trend-distance gate measured against a fully observed 210-day average instead of an EMA that still carried 5% weight on its first bar; a market real yield from TIPS instead of 10y minus CPI.</li>
+      <li><b>Adopted from your own Zobiris rules:</b> Hyperliquid positioning and Fear &amp; Greed are shown but carry no weight, because the Zobiris roadmap gives positioning shadow status with no trading authority.</li>
+      <li><b>Not adopted:</b> the review's claim that crypto momentum lacked history (the engine uses 3-day bars covering 300 days, and already annualizes crypto on 365 days); its open-interest objection (CoinMarketCap reports a true 30-day change, now netted against the market-cap change); enforcing the 24% ceiling under a 0.8 stress correlation, which would hold about 18% cash permanently and break your fully invested mandate, so stress volatility is shown instead.</li>
+      <li><b>Macro kept at 0.2, not 0:</b> the replay could not measure any effect either way (certainty-equivalent 19.9% without macro, 20.2% at 0.2 and 0.4), so macro keeps half its old authority as context rather than full control.</li>
+    </ul>
+
+    <h3>What the technical whitepaper changed, v3.1</h3>
+    <p class="small">The October 16 technical whitepaper documented this engine and audited it against public endpoints and independent calculations. Version 3.1 adopts its operating rules.</p>
+    <ul>
+      <li><b>Fail closed:</b> if a price series, the BTC month-end closes, the risk model or a final check is missing or fails, the run gives no actionable targets. The last valid run stays visible, labeled as history, and the blocked refresh is kept in the run log.</li>
+      <li><b>Every input carries a record:</b> source, units, observation date, retrieval time and a quality state, which is observed, delayed, missing, inconsistent or proxy. The Data quality card shows them on every run.</li>
+      <li><b>Gaps stay visible:</b> a missing optional input still counts as 0 and nothing is reweighted, but the run is marked degraded. The 10y minus CPI fallback for the TIPS yield and the Fed funds fallback for FedWatch are labeled proxies, because they measure something different.</li>
+      <li><b>Implausible values are excluded:</b> a 30-day open interest or market cap change beyond ±150% sets the leverage term to 0 instead of moving the crypto score.</li>
+      <li><b>Wording corrected:</b> the ballast step can raise VOO and gold after the sleeve projection, so the final check, not the order of the steps, is what guarantees the limits. The EWMA model is a second check for the crypto risk cap, not a display-only model.</li>
+    </ul>
+    <h3>Corrections the audit confirmed</h3>
+    <ul>
+      <li>Volatility here is the annualized standard deviation of log returns. ATR is a range statistic and is never used as volatility.</li>
+      <li>The shrinkage is the Ledoit–Wolf intensity toward the average correlation, applied to EWMA correlations. scikit-learn's LedoitWolf shrinks toward a scaled identity instead, so the two are different estimators.</li>
+      <li>The crypto cap has one exact answer: when crypto and non-crypto risk are both positive, the quadratic is negative at zero, so it has exactly one positive root. An independent rerun on 10,000 random portfolios under two covariance models found no case above the cap; the largest excess was 4.4 × 10⁻¹⁶.</li>
+      <li>CPCV and the Deflated Sharpe Ratio need the full return series of every trial, not the summary table, so neither is claimed. Derivatives, funding carry and meta-labeling stay separate research with no trading authority.</li>
+    </ul>
+
+    <h3>Replay, February 2021 to October 2026</h3>
+    <p class="small">Weekly decisions at Friday's close using only data observable then, executed at the next session's close, 0.10% cost per ETF trade and 0.50% per crypto trade, cash earning the 3-month T-bill. Gold uses GLD before IAUM existed.</p>
+    <div class="tw"><table class="cmp"><thead><tr><th>Rule set</th><th class="r">CAGR</th><th class="r hide-sm">Vol</th><th class="r">Max DD</th><th class="r">CE</th><th class="r hide-sm">Turnover</th></tr></thead><tbody><tr><td>Base plan</td><td class="r num">28.3%</td><td class="r num hide-sm">20.3%</td><td class="r num">38.6%</td><td class="r num">17.6%</td><td class="r num hide-sm">63%</td></tr><tr><td>Base + BTC gate</td><td class="r num">31.2%</td><td class="r num hide-sm">18.7%</td><td class="r num">28.7%</td><td class="r num">20.5%</td><td class="r num hide-sm">75%</td></tr><tr class="me"><td>v3 default</td><td class="r num">30.6%</td><td class="r num hide-sm">18.3%</td><td class="r num">29.2%</td><td class="r num">20.2%</td><td class="r num hide-sm">92%</td></tr><tr><td>v3 + drawdown</td><td class="r num">30.0%</td><td class="r num hide-sm">17.0%</td><td class="r num">23.9%</td><td class="r num">20.2%</td><td class="r num hide-sm">132%</td></tr><tr><td>v2, Oct 16</td><td class="r num">28.7%</td><td class="r num hide-sm">17.1%</td><td class="r num">24.5%</td><td class="r num">19.1%</td><td class="r num hide-sm">108%</td></tr></tbody></table></div><p class="small muted">Rows: the plain base plan rebalanced on bands; the same plus the monthly BTC gate; this app’s default; the default plus the drawdown overlay; version 2 as published. CE is the certainty-equivalent return. Volatility and turnover columns appear on wider screens.</p>
+    <ul>
+      <li>The monthly BTC gate does almost all the protective work: it cut the 2022 drawdown from 38.6% to 28.7%. The cut held with a 12-month average, but an 8-month average whipsawed and lost 2 points of certainty-equivalent return, so 10 months stays. Trend tilts added about 1.5 points of certainty-equivalent return; the volatility ceiling and crypto risk cap cost about 0.7 points as insurance.</li>
+      <li>No rule set clears the review's promotion bar: every 95% bootstrap interval for the gain over the plain base plan includes zero. 5.7 years and one bear market cannot prove an edge.</li>
+      <li>The absolute returns are flattered by hindsight: the twelve holdings were chosen in 2026, knowing NVIDIA, semiconductors, BTC and SOL did well. Read the table for differences between rule sets, not as a forecast.</li>
+      <li>CE is the certainty-equivalent return: annual excess return minus 1.5 times its variance. 28 configurations were tried; all are kept in the research log.</li>
+    </ul>
+
+    <h3>Where the data comes from</h3>
+    <ul>
+      <li><b>Twelve Data:</b> 260 days of daily closes for VOO, SMH, NVDA, MSFT, TSM, XLE, IAUM and GDX.</li>
+      <li><b>CoinDesk:</b> 100 daily and 100 three-day composite closes for BTC, ETH, SOL and LINK. <b>Crypto.com</b> is the fallback.</li>
+      <li><b>Alpha Vantage:</b> weekly 10-year Treasury yield, monthly CPI and Fed funds, and BTC month-end closes for the gate, cached 12 hours.</li>
+      <li><b>Firecrawl:</b> CME FedWatch odds for the next Fed decision, and FRED's 10-year TIPS yield (DFII10), cached 12 hours.</li>
+      <li><b>TEXT TO QUANT:</b> the RSPS crypto regime. <b>CoinMarketCap:</b> open interest, market cap, Fear &amp; Greed and ETF assets. <b>Coinversa Pulse:</b> Hyperliquid positioning, shown only.</li>
+    </ul>
+    <h3>Free-data path</h3>
+    <p class="small">The audit found that the core math needs no paid service: trend, momentum, covariance, the crypto cap and the equal-risk portfolios are computed here from price histories. What is free, and what is not:</p>
+    <div class="tw"><table class="cmp"><thead><tr><th>Input</th><th>Route</th><th>Status</th></tr></thead><tbody>
+      <tr><td>ETF daily closes</td><td>Twelve Data Basic: 8 credits a minute, 800 a day; one refresh uses 8</td><td><span class="badge good">free</span></td></tr>
+      <tr><td>Crypto daily and 3-day closes</td><td>CoinDesk with Crypto.com as fallback; Kraken's public OHLC (720 daily bars) also works</td><td><span class="badge good">free</span></td></tr>
+      <tr><td>BTC month-end closes</td><td>Alpha Vantage free tier, cached 12 hours</td><td><span class="badge good">free</span></td></tr>
+      <tr><td>10-year yield, CPI, Fed funds</td><td>Alpha Vantage or FRED</td><td><span class="badge good">free</span></td></tr>
+      <tr><td>Real yield (TIPS)</td><td>FRED DFII10; a replay needs ALFRED vintages, not today's revised values</td><td><span class="badge good">free</span></td></tr>
+      <tr><td>Fed odds</td><td>FedWatch page read by Firecrawl; the official FedWatch API is paid (about $25 a month end-of-day when checked)</td><td><span class="badge warn">conditional</span></td></tr>
+      <tr><td>Crypto regime</td><td>TEXT TO QUANT RSPS is proprietary, with no verified free contract</td><td><span class="badge warn">conditional</span></td></tr>
+      <tr><td>30-day open interest</td><td>CoinMarketCap gives a 30-day change without an observation time; Hyperliquid's public endpoint covers one venue, today only</td><td><span class="badge warn">conditional</span></td></tr>
+      <tr><td>A proven return edge</td><td>No data source supplies one; it needs frozen rules and a forward shadow record</td><td><span class="badge bad">unproven</span></td></tr>
+    </tbody></table></div>
+    <p class="small muted">Free means no new paid data subscription for personal research. It does not cover commercial display or redistribution, which Twelve Data's usage policy restricts.</p>
+    <h3>What it cannot do</h3>
+    <ul>
+      <li>It reacts to the market; it does not predict it. Trend rules lag turning points by design.</li>
+      <li>It does not know your tax lots. In a taxable account, every Trim can realize gains the replay does not charge for.</li>
+      <li>Fund look-through coefficients (NVIDIA at 8% of VOO and 20% of SMH) are assumptions, not verified holdings.</li>
+      <li>Crypto closes at 00:00 UTC, four hours after the US stock close, so daily correlations carry a small timing mismatch.</li>
+    </ul>
+  </div>
+</section>
+
+<section role="tabpanel" id="p-plan" aria-labelledby="t-plan" hidden>
+  <div class="card prose">
+    <h2>Base plan: medium plus</h2>
+    <p>The anchor the engine tilts from, set Oct 16, 2026 and revised the same day: crypto lowered to 20% with BTC at 10% and more SOL than ETH. Fully invested, because bonds and interest-earning accounts are held elsewhere.</p>
+    <div class="tw"><table id="baseTable"><thead><tr><th>Holding</th><th class="r">Base</th><th>Sleeve</th></tr></thead><tbody></tbody></table></div>
+    <h3>Standing rules</h3>
+    <ul>
+      <li><b>Bewegungskrieg:</b> stage new money. Core stocks at once, crypto and SMH in two tranches, gold over three months or more.</li>
+      <li><b>Hinhaltender Widerstand:</b> the monthly BTC gate, applied at each month-end close. It is the one rule the replay clearly supports.</li>
+      <li><b>Elastische Verteidigung:</b> act on Add or Trim signals only; ignore Hold noise.</li>
+      <li><b>Probe ledger:</b> new coins only from the CoinMarketCap top 500, at most 2% each, logged with a thesis and an exit.</li>
+    </ul>
+    <h3>Known weaknesses</h3>
+    <ul>
+      <li>Rebalanced without any gate, the plan fell 38.6% from November 2021 to October 2022 and stayed under water for 731 days. With the monthly gate the fall was 28.7%.</li>
+      <li>Crypto is 20% of the money but 28% to 50% of the plan's risk, depending on the year: 28% in mid October 2026, 50% in June 2022. Its volatility has cooled, with SOL at about 59% a year and BTC at 41% over the last 300 days, while gold miners have run near 52%.</li>
+    </ul>
+    <p class="disc">This app is research built from public data and your Zobiris framework. It is not personal financial advice and it does not place trades.</p>
+  </div>
+</section>
+
+</div></main>
+
+<script>
+/* Zobiris Lagebild allocation engine v3.0
+   v3 answers the October 16 formula review: volatility-scaled log signals, reduced macro authority,
+   shrunk PSD covariance, gates as upper bounds applied once, capacity-limited ballast, a closed-form
+   crypto risk-share repair, uniform volatility scaling, a final constraint check, signal smoothing
+   before the constraints, and actions measured against marked holdings when they are entered.
+   v3.1 follows the October 16 technical whitepaper: every input carries a quality record, and a run fails closed
+   (no actionable targets) when a required price, the BTC gate input, the risk model or a final check is missing or fails.
+   Pure functions: parse connector payloads, compute target weights.
+   Works in the browser (window.ZE) and in Node (module.exports). */
+(function (root) {
+  'use strict';
+
+  var VERSION = 'Zobiris Lagebild v3.1';
+  var ASSETS = [
+    { s: 'VOO',  sleeve: 'stocks', base: 26, kind: 'eq', name: 'S&P 500 core' },
+    { s: 'SMH',  sleeve: 'stocks', base: 12, kind: 'eq', name: 'Semiconductors' },
+    { s: 'NVDA', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'NVIDIA' },
+    { s: 'MSFT', sleeve: 'stocks', base: 4,  kind: 'eq', name: 'Microsoft' },
+    { s: 'TSM',  sleeve: 'stocks', base: 4,  kind: 'eq', name: 'TSMC' },
+    { s: 'XLE',  sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Energy hedge' },
+    { s: 'IAUM', sleeve: 'gold',   base: 16, kind: 'eq', name: 'Physical gold' },
+    { s: 'GDX',  sleeve: 'gold',   base: 8,  kind: 'eq', name: 'Gold miners' },
+    { s: 'BTC',  sleeve: 'crypto', base: 10, kind: 'cx', name: 'Bitcoin' },
+    { s: 'ETH',  sleeve: 'crypto', base: 3,  kind: 'cx', name: 'Ethereum' },
+    { s: 'SOL',  sleeve: 'crypto', base: 5,  kind: 'cx', name: 'Solana' },
+    { s: 'LINK', sleeve: 'crypto', base: 2,  kind: 'cx', name: 'Chainlink' }
+  ];
+  var SYMS = ASSETS.map(function (a) { return a.s; });
+  var SLEEVES = { gold: 24, stocks: 56, crypto: 20 };
+  // how far each sleeve may move [down, up] from its base, in % of total capital; upper limits are hard,
+  // lower limits relax only when a gate or risk control has to move money to cash
+  var SLEEVE_BAND = { gold: [5, 5], stocks: [5, 5], crypto: [5, 0] };
+  var ASSET_CAP = { BTC: 10 };
+  var ALTS = ['ETH', 'SOL', 'LINK'], CRYPTO = ['BTC', 'ETH', 'SOL', 'LINK'];
+  var DEFAULT_VOL = { VOO: .16, SMH: .32, NVDA: .45, MSFT: .25, TSM: .35, XLE: .25, IAUM: .16, GDX: .35, BTC: .50, ETH: .70, SOL: .85, LINK: .85 };
+  // NVIDIA weight inside each holding; fund coefficients are supplied assumptions, not verified holdings
+  var LOOK = { NVDA: 1, VOO: 0.08, SMH: 0.20 };
+  var PARAMS = {
+    kappa: 0.2, multMin: 0.6, multMax: 1.5,     // multiplier = clamp(exp(kappa * z)); 0.2, 0.4 and 0.6 replayed alike, 0.2 trades least
+    macroWeight: 0.2,                           // z = 0.8 S + 0.2 macro (v2 used 0.4)
+    trendH: { eq: 63 / 252, cx: 90 / 365 },     // trend distance is measured in volatility units over this horizon
+    momH: { eq: 105 / 252, cx: 105 / 365 },     // 21 to 126 day momentum window, on each asset's own clock
+    volFloor: 0.5,                              // sigma_eff = max(sigma, 0.5 x default vol)
+    volCap: 0.24,
+    cryptoRiskCap: 0.60, cryptoRiskCapStress: 0.50,
+    nvdaLookCap: 10,
+    smoothDays: 21, smooth: 0.5,
+    corrWindow: 63, ewmaLambda: 0.94, stressThreshold: 0.15,
+    shrinkMin: 0.25, shrinkMax: 0.75,           // guardrails on the Ledoit-Wolf constant-correlation intensity
+    stressRho: 0.8,                             // adverse correlation scenario, diagnostic only
+    gradedWarn: 0.5, gradedCut: 0.2, flowThreshold: -0.01,
+    ddDeadband: 0.10, ddMax: 0.30, ddFloor: 0.5,
+    semisWindow: 50,
+    gateMonths: 10,                             // BTC month-end close vs its N-month average; 8 and 12 replayed for robustness
+    ballast: { VOO: 0.6, IAUM: 0.4 },
+    bandAbs: 1.5, bandRel: 0.2
+  };
+  // defaults follow the 2021-2026 weekly replay: the monthly BTC gate carries the drawdown protection; the alt gate,
+  // the trend-distance gate and the drawdown overlay are switches the owner can turn on
+  var DEFAULT_OPTS = { signals: true, macro: true, altGate: false, monthlyGate: true, gradedGate: false, cryptoCap: true, volCap: true,
+    ddOverlay: false, smoothing: true, shadows: true, macroWeight: null };
+  var RISK_SET = ['VOO', 'SMH', 'NVDA', 'TSM', 'BTC', 'ETH', 'SOL'];
+  // 2026-2027 FOMC decision days (second day of each meeting)
+  var FOMC = ['2026-01-28','2026-03-18','2026-04-29','2026-06-17','2026-07-29','2026-09-16','2026-10-28','2026-12-09',
+              '2027-01-27','2027-03-17','2027-04-28','2027-06-16','2027-07-28','2027-09-22','2027-10-27','2027-12-08'];
+
+  function clamp(x, lo, hi) { if (lo === undefined) { lo = -1; hi = 1; } return Math.max(lo, Math.min(hi, x)); }
+  function mean(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : NaN; }
+  function sd(a) { var m = mean(a), s = 0; for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m); return a.length > 1 ? Math.sqrt(s / (a.length - 1)) : NaN; }
+  function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
+  function r4(x) { return Math.round(x * 10000) / 10000; }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function isNum(x) { return typeof x === 'number' && isFinite(x); }
+  function sum(o, keys) { var s = 0; (keys || Object.keys(o)).forEach(function (k) { s += o[k] || 0; }); return s; }
+
+  /* ---------- parsers ---------- */
+  function textOf(p) {
+    if (typeof p === 'string') return p;
+    if (p && typeof p === 'object') {
+      if (Array.isArray(p.content)) { for (var i = 0; i < p.content.length; i++) if (p.content[i].type === 'text') return p.content[i].text; }
+      if (typeof p.text === 'string') return p.text;
+      for (var k in p) { if (typeof p[k] === 'string' && p[k].indexOf('\n') >= 0) return p[k]; }
+    }
+    return null;
+  }
+  function jsonOf(p) {
+    if (p && typeof p === 'object' && !Array.isArray(p.content)) return p;
+    var t = textOf(p); if (t == null) return null;
+    try { return JSON.parse(t); } catch (e) { return null; }
+  }
+  var parse = {
+    // Twelve Data get_time_series: "datetime;open;high;low;close;volume" newest first
+    twelve: function (p) {
+      var t = textOf(p);
+      if (!t) { var j = jsonOf(p); if (j && Array.isArray(j.values)) return j.values.map(function (v) { return { d: v.datetime.slice(0, 10), c: +v.close }; }).filter(function (x) { return isNum(x.c); }).reverse(); return null; }
+      if (/run out of API credits|^Error/i.test(t)) { var e = new Error(t); e.rateLimited = /credits/i.test(t); throw e; }
+      var lines = t.trim().split(/\r?\n/), hdr = lines[0].split(/[;,]/).map(function (h) { return h.trim().toLowerCase(); });
+      var di = hdr.indexOf('datetime'), ci = hdr.indexOf('close');
+      if (di < 0 || ci < 0) return null;
+      var out = [];
+      for (var i = 1; i < lines.length; i++) { var f = lines[i].split(/[;,]/); var c = parseFloat(f[ci]); if (isNum(c)) out.push({ d: f[di].slice(0, 10), c: c }); }
+      out.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      return out;
+    },
+    // CoinDesk fetch_index_ohlcv: {Data:[{TIMESTAMP, CLOSE}]} oldest first; TIMESTAMP is the bar open (UTC)
+    coindesk: function (p) {
+      var j = jsonOf(p); if (!j || !Array.isArray(j.Data)) return null;
+      return j.Data.map(function (r) { return { d: new Date(r.TIMESTAMP * 1000).toISOString().slice(0, 10), c: +r.CLOSE }; })
+        .filter(function (x) { return isNum(x.c) && x.c > 0; })
+        .sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+    },
+    // Crypto.com get_candlestick: {data:[{close, timestamp}]} newest first
+    cryptocom: function (p) {
+      var j = jsonOf(p); var arr = j && (j.data || (j.result && j.result.data)); if (!Array.isArray(arr)) return null;
+      return arr.map(function (r) { var ts = r.timestamp || r.t; var d = typeof ts === 'number' ? new Date(ts).toISOString() : String(ts); return { d: d.slice(0, 10), c: +(r.close || r.c) }; })
+        .filter(function (x) { return isNum(x.c); }).sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+    },
+    // Alpha Vantage economic series (TREASURY_YIELD, CPI, FEDERAL_FUNDS_RATE): {data:[{date,value}]} or CSV
+    avSeries: function (p) {
+      var j = jsonOf(p), rows = [];
+      if (j && j.error) { var e0 = new Error(j.error.message || 'Alpha Vantage error'); e0.rateLimited = /rate/i.test(j.error.type || ''); throw e0; }
+      if (j && (j.Information || j.Note)) { var e1 = new Error(j.Information || j.Note); e1.rateLimited = true; throw e1; }
+      if (j && Array.isArray(j.data)) rows = j.data.map(function (r) { return { d: r.date, v: parseFloat(r.value) }; });
+      else { var t = textOf(p); if (!t) return null; var L = t.trim().split(/\r?\n/); for (var i = 1; i < L.length; i++) { var f = L[i].split(','); rows.push({ d: f[0], v: parseFloat(f[1]) }); } }
+      rows = rows.filter(function (r) { return isNum(r.v); });
+      rows.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      return rows.length ? rows : null;
+    },
+    // Gemini gemini_list_prediction_events: JSON wrapped in <tool-output> tags (kept for tests; the app no longer calls Gemini)
+    gemini: function (p) {
+      var j = (p && typeof p === 'object' && Array.isArray(p.data)) ? p : null;
+      if (!j) { var t = textOf(p) || (typeof p === 'string' ? p : null); if (!t) return null; var a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b < a) return null; try { j = JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; } }
+      return Array.isArray(j.data) ? j.data : null;
+    },
+    // Alpha Vantage DIGITAL_CURRENCY_MONTHLY csv: timestamp,open,high,low,close,volume (newest first)
+    avMonthly: function (p) {
+      var j = jsonOf(p);
+      if (j && j.error) { var e = new Error(j.error.message || 'Alpha Vantage error'); e.rateLimited = true; throw e; }
+      var t = textOf(p); if (!t) return null;
+      var L = t.trim().split(/\r?\n/), out = [];
+      for (var i = 1; i < L.length; i++) { var f = L[i].split(','); var c = parseFloat(f[4]); if (isNum(c)) out.push({ d: f[0], c: c }); }
+      out.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      return out.length ? out : null;
+    },
+    // FRED graph CSV read through Firecrawl: {markdown:"observation\\_date,DFII10\n2026-06-01,2.07\n..."}; blank values skipped
+    fred: function (p) {
+      var t = null;
+      if (p && typeof p === 'object') t = p.markdown || (p.data && p.data.markdown) || textOf(p); else if (typeof p === 'string') t = p;
+      if (!t) return null;
+      var rows = [];
+      t.split(/\r?\n/).forEach(function (ln) { var m = ln.match(/^(\d{4}-\d{2}-\d{2}),\s*(-?[\d.]+)\s*$/); if (m) rows.push({ d: m[1], v: parseFloat(m[2]) }); });
+      rows.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      return rows.length ? rows : null;
+    }
+  };
+
+  /* ---------- small helpers ---------- */
+  function logRets(a) { var r = []; for (var i = 1; i < a.length; i++) r.push(Math.log(a[i] / a[i - 1])); return r; }
+  function smaAt(closes, len, lag) { var n = closes.length - (lag || 0); return n >= len ? mean(closes.slice(n - len, n)) : null; }
+  function annVol(closes, n, ann) { if (!closes || closes.length < 22) return null; var s = sd(logRets(closes.slice(-(n + 1)))); return isNum(s) && s > 0 ? s * Math.sqrt(ann) : null; }
+  function monthEndCloses(series, nowISO) {
+    var byMonth = {}, order = [];
+    series.forEach(function (x) { var m = x.d.slice(0, 7); if (!(m in byMonth)) order.push(m); byMonth[m] = x.c; });
+    var cur = nowISO.slice(0, 7);
+    return order.filter(function (m) { return m < cur; }).map(function (m) { return { m: m, c: byMonth[m] }; });
+  }
+  function valueAtOrBefore(series, iso) { var v = null; for (var i = 0; i < series.length; i++) { if (series[i].d <= iso) v = series[i].v; else break; } return v; }
+  function shiftDays(iso, days) { var d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); }
+  function shiftMonths(iso, m) { var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + m); return d.toISOString().slice(0, 10); }
+  function cpiYoY(cpi, iso) { var now = valueAtOrBefore(cpi, iso), then = valueAtOrBefore(cpi, shiftMonths(iso, -12)); return now && then ? (now / then - 1) * 100 : null; }
+  function pctField(x) { if (x == null) return null; var v = parseFloat(String(x).replace(/[+%\s]/g, '')); return isNum(v) ? v : null; }
+  function erf(x) { var t = 1 / (1 + 0.3275911 * Math.abs(x)); var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; }
+  function Phi(x) { return 0.5 * (1 + erf(x / Math.SQRT2)); }
+
+  /* ---------- linear algebra ---------- */
+  function jacobiEig(A) {
+    var n = A.length, a = A.map(function (r) { return r.slice(); }), v = [], i, j, k;
+    for (i = 0; i < n; i++) { v.push([]); for (j = 0; j < n; j++) v[i].push(i === j ? 1 : 0); }
+    for (var sweep = 0; sweep < 100; sweep++) {
+      var off = 0; for (i = 0; i < n; i++) for (j = i + 1; j < n; j++) off += a[i][j] * a[i][j];
+      if (off < 1e-22) break;
+      for (var p = 0; p < n; p++) for (var q = p + 1; q < n; q++) {
+        if (Math.abs(a[p][q]) < 1e-300) continue;
+        var th = (a[q][q] - a[p][p]) / (2 * a[p][q]), t = sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1)), c = 1 / Math.sqrt(t * t + 1), s = t * c;
+        for (k = 0; k < n; k++) { var akp = a[k][p], akq = a[k][q]; a[k][p] = c * akp - s * akq; a[k][q] = s * akp + c * akq; }
+        for (k = 0; k < n; k++) { var apk = a[p][k], aqk = a[q][k]; a[p][k] = c * apk - s * aqk; a[q][k] = s * apk + c * aqk; }
+        for (k = 0; k < n; k++) { var vkp = v[k][p], vkq = v[k][q]; v[k][p] = c * vkp - s * vkq; v[k][q] = s * vkp + c * vkq; }
+      }
+    }
+    return { vals: a.map(function (r, ii) { return r[ii]; }), vecs: v };
+  }
+  // nearest valid correlation matrix by eigenvalue clipping and unit-diagonal rescaling
+  function psdCorr(R) {
+    var e = jacobiEig(R), n = R.length, minE = Math.min.apply(null, e.vals);
+    if (minE >= 1e-8) return { R: R, repaired: false, minEig: minE };
+    var lam = e.vals.map(function (x) { return Math.max(x, 1e-8); }), M = [], i, j, k;
+    for (i = 0; i < n; i++) { M.push([]); for (j = 0; j < n; j++) { var s = 0; for (k = 0; k < n; k++) s += e.vecs[i][k] * lam[k] * e.vecs[j][k]; M[i].push(s); } }
+    var d = M.map(function (r, ii) { return 1 / Math.sqrt(r[ii]); });
+    for (i = 0; i < n; i++) for (j = 0; j < n; j++) M[i][j] = i === j ? 1 : M[i][j] * d[i] * d[j];
+    return { R: M, repaired: true, minEig: minE };
+  }
+  function covFrom(R, vol, syms) { return syms.map(function (a, i) { return syms.map(function (b, j) { return R[i][j] * vol[a] * vol[b]; }); }); }
+  function portRisk(w, syms, C) {
+    var n = syms.length, Cw = [], v = 0;
+    for (var i = 0; i < n; i++) { var s = 0; for (var j = 0; j < n; j++) s += C[i][j] * (w[syms[j]] || 0) / 100; Cw.push(s); }
+    for (var k = 0; k < n; k++) v += (w[syms[k]] || 0) / 100 * Cw[k];
+    var rc = {}; syms.forEach(function (s, i) { rc[s] = v > 1e-14 ? (w[s] || 0) / 100 * Cw[i] / v : 0; });
+    return { vol: Math.sqrt(Math.max(v, 0)), v: v, rc: rc, Cw: Cw };
+  }
+  function cryptoShareOf(rk) { return CRYPTO.reduce(function (s, x) { return s + (rk.rc[x] || 0); }, 0); }
+
+  /* ---------- risk model ---------- */
+  // daily log returns on the stock calendar; crypto closes are sampled at each stock date, so weekend moves land in Monday
+  function alignedReturns(prices, syms, win) {
+    var anchor = prices.VOO || prices.SMH || prices.IAUM; if (!anchor) return null;
+    var dates = anchor.map(function (x) { return x.d; });
+    var cols = {}, have = syms.filter(function (s) { return prices[s] && prices[s].length; });
+    have.forEach(function (s) {
+      var arr = [], last = null, src = prices[s], j = 0;
+      for (var i = 0; i < dates.length; i++) { while (j < src.length && src[j].d <= dates[i]) { last = src[j].c; j++; } arr.push(last); }
+      cols[s] = arr;
+    });
+    var idx = []; for (var i2 = dates.length - 1; i2 >= 0 && idx.length < win + 1; i2--) { var ok = have.every(function (s) { return cols[s][i2] != null; }); if (ok) idx.unshift(i2); else break; }
+    if (idx.length < 31) return null;
+    var R = {}; have.forEach(function (s) { R[s] = logRets(idx.map(function (k) { return cols[s][k]; })); });
+    return { syms: have, R: R, n: idx.length - 1, from: dates[idx[0]], to: dates[idx[idx.length - 1]] };
+  }
+  function sampleCorr(ar, syms) {
+    var n = syms.length, corr = [], have = ar ? ar.syms : [];
+    for (var a = 0; a < n; a++) { corr.push([]); for (var b = 0; b < n; b++) corr[a].push(a === b ? 1 : null); }
+    for (var x = 0; x < n; x++) for (var y = x + 1; y < n; y++) {
+      var s1 = syms[x], s2 = syms[y];
+      if (have.indexOf(s1) >= 0 && have.indexOf(s2) >= 0) {
+        var r1 = ar.R[s1], r2_ = ar.R[s2], m1 = mean(r1), m2 = mean(r2_), cv = 0;
+        for (var k = 0; k < r1.length; k++) cv += (r1[k] - m1) * (r2_[k] - m2);
+        cv /= (r1.length - 1);
+        var c = cv / (sd(r1) * sd(r2_)); corr[x][y] = corr[y][x] = isNum(c) ? c : null;
+      }
+    }
+    return corr;
+  }
+  function ewmaStats(ar, syms, lambda) {
+    var n = syms.length, corr = [], vol = {};
+    for (var i = 0; i < n; i++) { corr.push([]); for (var j = 0; j < n; j++) corr[i].push(i === j ? 1 : null); }
+    if (!ar || ar.n < 30) return { corr: corr, vol: vol };
+    var have = ar.syms, k = have.length, T = ar.n, S = [], seed = Math.min(20, T);
+    for (var a = 0; a < k; a++) { S.push([]); for (var b = 0; b < k; b++) { var v = 0; for (var t = 0; t < seed; t++) v += ar.R[have[a]][t] * ar.R[have[b]][t]; S[a].push(v / seed); } }
+    for (var t2 = seed; t2 < T; t2++) for (var a2 = 0; a2 < k; a2++) for (var b2 = a2; b2 < k; b2++) {
+      var val = lambda * S[a2][b2] + (1 - lambda) * ar.R[have[a2]][t2] * ar.R[have[b2]][t2]; S[a2][b2] = val; S[b2][a2] = val;
+    }
+    have.forEach(function (s1, a3) {
+      vol[s1] = Math.sqrt(S[a3][a3] * 252);
+      have.forEach(function (s2, b3) { var i2 = syms.indexOf(s1), j2 = syms.indexOf(s2); if (i2 !== j2) corr[i2][j2] = S[a3][b3] / Math.sqrt(S[a3][a3] * S[b3][b3]); });
+    });
+    return { corr: corr, vol: vol };
+  }
+  // Ledoit and Wolf (2004) shrinkage intensity toward the constant-correlation target, on the equal-weight sample
+  function ledoitWolf(ar) {
+    if (!ar || ar.n < 30 || ar.syms.length < 3) return null;
+    var S0 = ar.syms, N = S0.length, T = ar.n, Y = [], i, j, t;
+    for (i = 0; i < N; i++) { var r = ar.R[S0[i]], m = mean(r); Y.push(r.map(function (x) { return x - m; })); }
+    var S = [];
+    for (i = 0; i < N; i++) { S.push([]); for (j = 0; j < N; j++) { var c = 0; for (t = 0; t < T; t++) c += Y[i][t] * Y[j][t]; S[i].push(c / T); } }
+    var rb = 0, cnt = 0;
+    for (i = 0; i < N; i++) for (j = i + 1; j < N; j++) { rb += S[i][j] / Math.sqrt(S[i][i] * S[j][j]); cnt++; }
+    rb /= cnt;
+    var pi = 0, rho = 0, gamma = 0;
+    var th = []; // theta_ii,ij
+    for (i = 0; i < N; i++) { th.push([]); for (j = 0; j < N; j++) { var s1 = 0; for (t = 0; t < T; t++) s1 += (Y[i][t] * Y[i][t] - S[i][i]) * (Y[i][t] * Y[j][t] - S[i][j]); th[i].push(s1 / T); } }
+    for (i = 0; i < N; i++) for (j = 0; j < N; j++) {
+      var p = 0; for (t = 0; t < T; t++) { var d = Y[i][t] * Y[j][t] - S[i][j]; p += d * d; } pi += p / T;
+      var f = i === j ? S[i][i] : rb * Math.sqrt(S[i][i] * S[j][j]); gamma += (f - S[i][j]) * (f - S[i][j]);
+      if (i !== j) rho += (rb / 2) * (Math.sqrt(S[j][j] / S[i][i]) * th[i][j] + Math.sqrt(S[i][i] / S[j][j]) * th[j][i]);
+    }
+    for (i = 0; i < N; i++) { var pd = 0; for (t = 0; t < T; t++) { var dd = Y[i][t] * Y[i][t] - S[i][i]; pd += dd * dd; } rho += pd / T; }
+    var kappa = gamma > 0 ? (pi - rho) / gamma : 1;
+    return { delta: clamp(kappa / T, 0, 1), rbar: rb };
+  }
+  // base risk model: long-window volatilities with EWMA correlations shrunk toward constant correlation, made PSD
+  function riskModel(prices, longC, syms) {
+    var ar = alignedReturns(prices, syms, 250), ar63 = alignedReturns(prices, syms, PARAMS.corrWindow);
+    var E = ewmaStats(ar, syms, PARAMS.ewmaLambda), lw = ledoitWolf(ar63);
+    var rbar = lw ? clamp(lw.rbar, 0, 0.9) : 0.3, delta = lw ? clamp(lw.delta, PARAMS.shrinkMin, PARAMS.shrinkMax) : PARAMS.shrinkMax;
+    var n = syms.length, Rb = [], Re = [], Rs = [], Rst = [], volL = {}, volE = {}, srcVol = {};
+    syms.forEach(function (s, i) {
+      var a = ASSETS[i], v = null;
+      if (a.kind === 'eq') { var c = prices[s] ? prices[s].map(function (x) { return x.c; }) : null; v = annVol(c, 252, 252); srcVol[s] = v ? 'daily, ' + Math.min(252, c.length - 1) + 'd' : 'default'; }
+      else {
+        var lc = longC[s] ? longC[s].map(function (x) { return x.c; }) : null, dc = prices[s] ? prices[s].map(function (x) { return x.c; }) : null;
+        v = lc && lc.length >= 40 ? annVol(lc, lc.length - 1, 365 / 3) : null; srcVol[s] = v ? '3-day bars, ' + (lc.length - 1) * 3 + 'd' : '';
+        if (!v) { v = annVol(dc, 99, 365); srcVol[s] = v ? 'daily, ' + Math.min(99, dc.length - 1) + 'd' : 'default'; }
+      }
+      volL[s] = v || DEFAULT_VOL[s];
+      volE[s] = E.vol[s] || volL[s];
+    });
+    var S63 = sampleCorr(ar63, syms);
+    for (var i = 0; i < n; i++) { Rb.push([]); Re.push([]); Rs.push([]); Rst.push([]);
+      for (var j = 0; j < n; j++) {
+        if (i === j) { Rb[i].push(1); Re[i].push(1); Rs[i].push(1); Rst[i].push(1); continue; }
+        var e = E.corr[i][j], s63 = S63[i][j];
+        Re[i].push(e != null ? e : rbar);
+        Rb[i].push(e != null ? (1 - delta) * e + delta * rbar : rbar);
+        Rs[i].push(s63 != null ? s63 : rbar);
+        Rst[i].push(PARAMS.stressRho);
+      }
+    }
+    var pb = psdCorr(Rb), pe = psdCorr(Re), ps = psdCorr(Rs);
+    return {
+      syms: syms, ar: ar, ar63: ar63, delta: delta, rbar: rbar, lwRaw: lw ? lw.delta : null,
+      Rbase: pb.R, Rewma: pe.R, Rsample: ps.R, Rraw: { ewma: E.corr, sample: S63 },
+      Cbase: covFrom(pb.R, volL, syms), Cewma: covFrom(pe.R, volE, syms), Csample: covFrom(ps.R, volL, syms), Cstress: covFrom(Rst, volL, syms),
+      volL: volL, volE: volE, srcVol: srcVol, psd: { base: pb.repaired, ewma: pe.repaired, sample: ps.repaired, minEigBase: pb.minEig }
+    };
+  }
+  function avgCorr(corr, syms, set) {
+    var idx = set.map(function (s) { return syms.indexOf(s); }).filter(function (i) { return i >= 0; }), s = 0, c = 0;
+    for (var a = 0; a < idx.length; a++) for (var b = a + 1; b < idx.length; b++) { var v = corr[idx[a]][idx[b]]; if (v != null) { s += v; c++; } }
+    return c ? s / c : null;
+  }
+
+  /* ---------- Fed, flows, semis, drawdown ---------- */
+  var FED_STEP = { MAINTAIN: 0, HIKE25: 0.25, HIKEGT25: 0.5, CUT25: -0.25, CUTGT25: -0.5 };
+  // prediction-market odds; each meeting quotes the move relative to today's rate, so only the next meeting is used
+  function fedOdds(events, nowISO) {
+    if (!Array.isArray(events)) return null;
+    var fed = events.filter(function (e) { return /^FED\d{6}$/.test(e.ticker || '') && e.expiryDate && e.expiryDate.slice(0, 10) >= nowISO; })
+      .sort(function (a, b) { return a.expiryDate < b.expiryDate ? -1 : 1; }).slice(0, 2);
+    if (!fed.length) return null;
+    var meetings = fed.map(function (e) {
+      var pr = {}, tot = 0;
+      (e.contracts || []).forEach(function (c) {
+        if (!(c.ticker in FED_STEP)) return;
+        var bid = c.prices && parseFloat(c.prices.bestBid), ask = c.prices && parseFloat(c.prices.bestAsk);
+        var mid = isNum(bid) && isNum(ask) ? (bid + ask) / 2 : isNum(ask) ? ask / 2 : isNum(bid) ? bid : 0;
+        pr[c.ticker] = mid; tot += mid;
+      });
+      if (tot <= 0) return null;
+      var exp = 0; Object.keys(pr).forEach(function (k) { pr[k] /= tot; exp += pr[k] * FED_STEP[k]; });
+      var exD = e.expiryDate.slice(0, 10), dec = FOMC.filter(function (f) { return f <= exD && (new Date(exD) - new Date(f)) / 864e5 <= 10; }).pop() || exD;
+      return { ticker: e.ticker, date: dec, hike: r2((pr.HIKE25 || 0) + (pr.HIKEGT25 || 0)), hold: r2(pr.MAINTAIN || 0), cut: r2((pr.CUT25 || 0) + (pr.CUTGT25 || 0)), exp: r4(exp) };
+    }).filter(Boolean);
+    if (!meetings.length) return null;
+    return { source: 'prediction markets', meetings: meetings, cumExp: meetings[0].exp };
+  }
+  // CME FedWatch via Firecrawl page extraction: {json:{meetings:[{date,hike,hold,cut}]}} in percent; next meeting only
+  function fedWatchOdds(p, nowISO) {
+    var j = p; if (typeof j === 'string') { try { j = JSON.parse(j); } catch (e) { return null; } }
+    var ms = j && ((j.json && j.json.meetings) || (j.data && j.data.json && j.data.json.meetings) || j.meetings);
+    if (!Array.isArray(ms) || !ms.length) return null;
+    var m = ms[0], hike = +m.hike || 0, hold = +m.hold || 0, cut = +m.cut || 0, tot = hike + hold + cut;
+    if (!(tot > 50 && tot < 150)) return null;
+    hike /= tot; hold /= tot; cut /= tot;
+    var d = new Date(m.date); var iso = isNaN(d) ? null : new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10);
+    var fomc = FOMC.filter(function (f) { return f >= nowISO; })[0];
+    var exp = 0.25 * (hike - cut);
+    return { source: 'CME FedWatch', meetings: [{ date: iso || fomc, hike: r2(hike), hold: r2(hold), cut: r2(cut), exp: r4(exp) }], cumExp: r4(exp) };
+  }
+  function parseBillions(x) { if (x == null) return null; var m = String(x).match(/([\d.]+)\s*([TBM])?/); if (!m) return null; var v = parseFloat(m[1]); return m[2] === 'T' ? v * 1000 : m[2] === 'M' ? v / 1000 : v; }
+  // spot BTC ETF assets minus the price effect: a creation/redemption proxy, shown only
+  function etfFlow(global, btcDaily) {
+    var e = global && global.trad_fi_flows && global.trad_fi_flows.etf_aum && global.trad_fi_flows.etf_aum.btc;
+    if (!e || !e.history || !btcDaily || btcDaily.length < 8) return null;
+    var now = parseBillions(e.current), wk = parseBillions(e.history.last_week);
+    if (!isNum(now) || !isNum(wk) || wk <= 0) return null;
+    var p0 = btcDaily[btcDaily.length - 8].c, p1 = btcDaily[btcDaily.length - 1].c;
+    var flow = now - wk * (p1 / p0);
+    return { aum: r2(now), flowB: r2(flow), pct: r4(flow / wk) };
+  }
+  function semisZ(prices) {
+    var a = prices.SMH, b = prices.VOO; if (!a || !b) return null;
+    var mb = {}; b.forEach(function (x) { mb[x.d] = x.c; });
+    var rs = a.filter(function (x) { return mb[x.d]; }).map(function (x) { return x.c / mb[x.d]; });
+    if (rs.length < PARAMS.semisWindow) return null;
+    var win = rs.slice(-PARAMS.semisWindow), m = mean(win), s = sd(win);
+    return s > 0 ? r2((rs[rs.length - 1] - m) / s) : null;
+  }
+  // drawdown of the base plan over the available window (about one year; crypto before its last 100 days uses 3-day bars)
+  function drawdownBudget(prices, longC) {
+    var anchor = prices.VOO; if (!anchor || anchor.length < 60) return null;
+    var dates = anchor.map(function (x) { return x.d; });
+    function series(s) {
+      var src = (longC[s] || []).concat(prices[s] || []).sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      if (!src.length) return null;
+      var out = [], last = null, j = 0;
+      for (var i = 0; i < dates.length; i++) { while (j < src.length && src[j].d <= dates[i]) { last = src[j].c; j++; } out.push(last); }
+      return out;
+    }
+    var cols = {}, wts = {}, tw = 0;
+    ASSETS.forEach(function (a) { var c = series(a.s); if (c) { cols[a.s] = c; wts[a.s] = a.base; tw += a.base; } });
+    var start = 0; for (var i = 0; i < dates.length; i++) { var ok = Object.keys(cols).every(function (s) { return cols[s][i] != null; }); if (ok) { start = i; break; } }
+    var nav = [1];
+    for (var t = start + 1; t < dates.length; t++) {
+      var r = 0; Object.keys(cols).forEach(function (s) { r += wts[s] / tw * (cols[s][t] / cols[s][t - 1] - 1); }); nav.push(nav[nav.length - 1] * (1 + r));
+    }
+    if (nav.length < 40) return null;
+    var peak = 1, maxDD = 0; nav.forEach(function (v) { peak = Math.max(peak, v); maxDD = Math.max(maxDD, 1 - v / peak); });
+    var D = 1 - nav[nav.length - 1] / Math.max.apply(null, nav);
+    var m = D <= PARAMS.ddDeadband ? 1 : Math.max(PARAMS.ddFloor, 1 - (1 - PARAMS.ddFloor) * (D - PARAMS.ddDeadband) / (PARAMS.ddMax - PARAMS.ddDeadband));
+    return { D: r4(D), maxDD: r4(maxDD), m: r4(m), days: nav.length - 1, from: dates[start] };
+  }
+
+  /* ---------- RSPS regime: read weekly and daily verdicts from whatever shape TEXT TO QUANT returns ---------- */
+  function regimeList(p) {
+    if (!p) return [];
+    var j = p;
+    if (typeof j === 'string') { try { j = JSON.parse(j); } catch (e) { j = { text: p }; } }
+    if (j && typeof j === 'object' && !Array.isArray(j.regimes)) { var t = textOf(j); if (t) { try { var jj = JSON.parse(t); if (jj && typeof jj === 'object') j = jj; } catch (e) {} } }
+    var out = [], seen = {};
+    function tfOf(x) { x = String(x).toLowerCase(); return /\b1w\b|week/.test(x) ? '1w' : /\b1d\b|daily|\bday\b/.test(x) ? '1d' : null; }
+    function verdictOf(v) { var s0 = typeof v === 'string' ? v : v && typeof v === 'object' ? (v.verdict && typeof v.verdict === 'object' ? v.verdict.verdict : v.verdict || v.value || v.text || v.display || v.label || v.state) : null; var m = s0 && String(s0).toUpperCase().match(/\b(RUN|REVIEW|SKIP)\b/); return m ? m[1] : null; }
+    function add(tf, v) { var k = tfOf(tf), vv = verdictOf(v); if (k && vv && !seen[k]) { seen[k] = 1; out.push({ timeframe: k, verdict: { verdict: vv } }); } }
+    (function walk(o, depth) {
+      if (!o || typeof o !== 'object' || depth > 6) return;
+      if (Array.isArray(o)) { o.forEach(function (x) { walk(x, depth + 1); }); return; }
+      var tf = o.timeframe != null ? o.timeframe : o.tf != null ? o.tf : o.interval != null ? o.interval : o.label != null ? o.label : o.title != null ? o.title : o.name;
+      var v = o.verdict != null ? o.verdict : o.value != null ? o.value : o.state;
+      if (tf != null && v != null) add(tf, v);
+      Object.keys(o).forEach(function (k) { if (/^(1w|1d|weekly|daily)$/i.test(k)) add(k, o[k]); walk(o[k], depth + 1); });
+    })(j, 0);
+    if (!out.length) { var txt = typeof p === 'string' ? p : JSON.stringify(j); var re = /\b(1w|1d|weekly|daily)\b[^A-Za-z]{0,40}?(RUN|REVIEW|SKIP)\b/gi, m; while ((m = re.exec(txt))) add(m[1], m[2]); }
+    return out;
+  }
+
+  /* ---------- macro scores, each in [-1, 1]; missing parts count as 0 and are never reweighted ---------- */
+  function macroScores(inp, nowISO, notes, ext) {
+    ext = ext || {};
+    var out = { gold: 0, stocks: 0, crypto: 0, detail: {} }, D = out.detail;
+    var m = inp.macro || {};
+    var ffTerm = 0, semisTerm = ext.semisZ != null ? clamp(ext.semisZ / 1.5) : 0;
+    if (ext.semisZ != null) D.semisZ = ext.semisZ;
+    if (m.ff && m.ff.length > 6) { var ffl = m.ff[m.ff.length - 1].v, ff6 = m.ff[m.ff.length - 7].v; D.fedFunds = ffl; D.fedFundsChg6m = r2(ffl - ff6); ffTerm = ffl - ff6 > 0.1 ? -1 : ffl - ff6 < -0.1 ? 1 : 0; }
+    if (ext.fed) { ffTerm = clamp(-ext.fed.cumExp / 0.25); D.fedSource = ext.fed.source; D.fedOdds = ext.fed; } else D.fedSource = m.ff && m.ff.length > 6 ? 'Fed funds 6-month change' : 'unavailable';
+    D.fedTerm = r2(ffTerm);
+    var y = null, y13 = null, lastD = nowISO;
+    if (m.tsy10 && m.tsy10.length) {
+      lastD = m.tsy10[m.tsy10.length - 1].d; y = m.tsy10[m.tsy10.length - 1].v; y13 = valueAtOrBefore(m.tsy10, shiftDays(lastD, -91));
+      D.tsy10 = y; D.tsy10Chg3m = y13 != null ? r2(y - y13) : null;
+      var levelTerm = y >= 5 ? -1 : y >= 4.5 ? -0.5 : y >= 4 ? 0 : 0.5;
+      out.stocks = clamp(0.3 * clamp(-(D.tsy10Chg3m || 0) / 0.5) + 0.3 * levelTerm + 0.15 * ffTerm + 0.25 * semisTerm);
+    } else {
+      notes.push('Treasury yields unavailable: the stock macro score uses only the Fed and semis terms.');
+      out.stocks = clamp(0.15 * ffTerm + 0.25 * semisTerm);
+    }
+    // real yield: market TIPS yield when available, otherwise the labeled CPI proxy
+    var realChg = null;
+    if (m.real && m.real.length >= 40) {
+      var rl = m.real[m.real.length - 1], r3 = valueAtOrBefore(m.real, shiftDays(rl.d, -91));
+      if (r3 != null) { D.realYield = rl.v; D.realYieldChg3m = r2(rl.v - r3); D.realSource = '10-year TIPS yield (FRED DFII10)'; realChg = rl.v - r3; }
+    }
+    if (realChg == null && y != null && m.cpi && m.cpi.length > 15) {
+      var cpiNow = cpiYoY(m.cpi, lastD), cpiThen = cpiYoY(m.cpi, shiftDays(lastD, -91));
+      if (cpiNow != null && cpiThen != null && y13 != null) { D.realYield = r2(y - cpiNow); D.realYieldChg3m = r2((y - cpiNow) - (y13 - cpiThen)); D.realSource = 'proxy: 10-year yield minus trailing CPI'; realChg = D.realYieldChg3m; }
+    }
+    if (m.cpi && m.cpi.length > 15) { var cy = cpiYoY(m.cpi, lastD); if (cy != null) D.cpiYoY = r2(cy); }
+    out.gold = clamp((realChg != null ? 0.55 * clamp(-realChg / 0.5) : 0) + 0.3 * ffTerm - 0.15 * semisTerm);
+
+    // crypto: price regime 0.6 and leverage 0.4; Fear & Greed and wallet positioning are shown, not used
+    var c = 0, used = 0;
+    var regs = regimeList(inp.regime);
+    if (inp.regime && !regs.length) { D.regimeUnread = true; notes.push('TEXT TO QUANT answered, but no weekly or daily verdict could be read from its response: crypto regime counts as 0.'); }
+    if (regs.length) {
+      var map = { RUN: 1, REVIEW: 0, SKIP: -1 }, val = {};
+      regs.forEach(function (r) { val[r.timeframe] = map[r.verdict && r.verdict.verdict] || 0; });
+      D.regime1w = regs.filter(function (r) { return r.timeframe === '1w'; }).map(function (r) { return r.verdict.verdict; })[0] || null;
+      D.regime1d = regs.filter(function (r) { return r.timeframe === '1d'; }).map(function (r) { return r.verdict.verdict; })[0] || null;
+      c += 0.6 * (0.6 * (val['1w'] || 0) + 0.4 * (val['1d'] || 0)); used++;
+    }
+    if (inp.global) {
+      var g = inp.global, fg = g.sentiment && g.sentiment.fear_greed && g.sentiment.fear_greed.current && g.sentiment.fear_greed.current.index;
+      if (isNum(fg)) D.fearGreed = fg;
+      var oi = pctField(g.leverage && g.leverage.open_interest && g.leverage.open_interest.total && g.leverage.open_interest.total.percent_change && g.leverage.open_interest.total.percent_change['30d']);
+      var mc = pctField(g.market_size && g.market_size.total_crypto_market_cap_usd && g.market_size.total_crypto_market_cap_usd.percent_change && g.market_size.total_crypto_market_cap_usd.percent_change['30d']);
+      // a 30-day change beyond 150% either way is treated as a bad reading, not a market move
+      if ((oi != null && Math.abs(oi) > 150) || (mc != null && Math.abs(mc) > 150)) {
+        D.oiFlag = 'inconsistent'; notes.push('CoinMarketCap 30-day change looked implausible (open interest ' + oi + '%, market cap ' + mc + '%): leverage term set to 0.'); oi = null;
+      }
+      if (oi != null) {
+        D.oi30d = oi; if (mc != null) D.mcap30d = mc;
+        var net = oi - (mc != null ? mc : 0); D.oiNet30d = r2(net);
+        var levS = net > 20 ? -1 : net > 10 ? -0.5 : net < -10 ? 0.5 : 0; c += 0.4 * levS; used++;
+      }
+      var dom = g.dominance && g.dominance.btc && g.dominance.btc.current; if (dom) D.btcDominance = pctField(dom);
+      var alt = g.rotation && g.rotation.altcoin_season && g.rotation.altcoin_season.current && g.rotation.altcoin_season.current.index; if (isNum(alt)) D.altSeason = alt;
+    }
+    if (inp.bias && Array.isArray(inp.bias.tiers)) {
+      var L = 0, S = 0, crowd = null;
+      inp.bias.tiers.forEach(function (t) {
+        if (t.tier === 'money_printer' || t.tier === 'smart_money') { L += t.longNotional || 0; S += t.shortNotional || 0; }
+        if (t.tier === 'exit_liquidity') crowd = t.netBiasByNotional;
+      });
+      if (L + S > 0 && crowd != null) { D.smartBias = r2((L - S) / (L + S)); D.crowdBias = r2(crowd); }
+    }
+    out.crypto = clamp(c);
+    if (!used) notes.push('Crypto regime and leverage unavailable: crypto macro score set to neutral.');
+    out.gold = r2(out.gold); out.stocks = r2(out.stocks); out.crypto = r2(out.crypto);
+    return out;
+  }
+
+  /* ---------- signals ---------- */
+  function assetSignal(a, prices, longC) {
+    var o = { T: 0, M: 0, S: 0, ok: false }, dv = DEFAULT_VOL[a.s];
+    if (a.kind === 'eq') {
+      var cl = prices[a.s] ? prices[a.s].map(function (x) { return x.c; }) : null;
+      if (cl && cl.length >= 220) {
+        var n = cl.length, p = cl[n - 1], sma = smaAt(cl, 200, 0), smaPrev = smaAt(cl, 200, 20);
+        var vol = annVol(cl, 63, 252) || dv, ve = Math.max(vol, PARAMS.volFloor * dv);
+        var trendLog = Math.log(p / sma), momLog = Math.log(cl[n - 22] / cl[n - 127]);
+        o = { ok: true, p: p, sma: sma, slope: sma - smaPrev, vol: vol, volEff: ve, dist: trendLog, mom: momLog,
+          T: clamp(trendLog / (ve * Math.sqrt(PARAMS.trendH.eq))), M: clamp(momLog / (ve * Math.sqrt(PARAMS.momH.eq))) };
+      }
+    } else {
+      var lc = longC[a.s] ? longC[a.s].map(function (x) { return x.c; }) : null, dd = prices[a.s];
+      if (lc && lc.length >= 77) {
+        var m = lc.length, sma3 = smaAt(lc, 70, 0), smaPrev3 = smaAt(lc, 70, 7);
+        var pNow = dd && dd.length ? dd[dd.length - 1].c : lc[m - 1];
+        var dcl = dd ? dd.map(function (x) { return x.c; }) : null;
+        var vol2 = annVol(dcl, 63, 365) || (lc.length > 40 ? annVol(lc, 42, 365 / 3) : null) || dv, ve2 = Math.max(vol2, PARAMS.volFloor * dv);
+        var tl = Math.log(pNow / sma3), ml = Math.log(lc[m - 8] / lc[m - 43]);
+        o = { ok: true, p: pNow, sma: sma3, slope: sma3 - smaPrev3, vol: vol2, volEff: ve2, dist: tl, mom: ml,
+          T: clamp(tl / (ve2 * Math.sqrt(PARAMS.trendH.cx))), M: clamp(ml / (ve2 * Math.sqrt(PARAMS.momH.cx))) };
+      }
+    }
+    o.S = o.ok ? 0.5 * o.T + 0.5 * o.M : 0;
+    return o;
+  }
+
+  /* ---------- sleeve projection: exact, sleeve totals clamped to their bands and summing to 100 ---------- */
+  function sleeveLimits(sl) { return [SLEEVES[sl] - SLEEVE_BAND[sl][0], SLEEVES[sl] + SLEEVE_BAND[sl][1]]; }
+  function projectSleeves(w) {
+    var tot = { gold: 0, stocks: 0, crypto: 0 };
+    ASSETS.forEach(function (a) { tot[a.sleeve] += w[a.s]; });
+    function f(k) { var s = 0; Object.keys(tot).forEach(function (sl) { var L = sleeveLimits(sl); s += clamp(k * tot[sl], L[0], L[1]); }); return s; }
+    var lo = 0, hi = 10; for (var it = 0; it < 200; it++) { var mid = (lo + hi) / 2; if (f(mid) < 100) lo = mid; else hi = mid; }
+    var k = (lo + hi) / 2, out = {};
+    var tgt = {}; Object.keys(tot).forEach(function (sl) { var L = sleeveLimits(sl); tgt[sl] = clamp(k * tot[sl], L[0], L[1]); });
+    var s = sum(tgt); Object.keys(tgt).forEach(function (sl) { tgt[sl] *= 100 / s; });
+    ASSETS.forEach(function (a) { out[a.s] = tot[a.sleeve] > 0 ? w[a.s] * tgt[a.sleeve] / tot[a.sleeve] : 0; });
+    return out;
+  }
+
+  /* ---------- closed-form crypto risk-share repair (crypto scaled by a, freed weight to cash) ---------- */
+  function cryptoScale(w, C, q) {
+    var n = {}, k = {}; SYMS.forEach(function (s) { n[s] = CRYPTO.indexOf(s) >= 0 ? 0 : w[s] / 100; k[s] = CRYPTO.indexOf(s) >= 0 ? w[s] / 100 : 0; });
+    function quad(x, y) { var s = 0; for (var i = 0; i < SYMS.length; i++) for (var j = 0; j < SYMS.length; j++) s += x[SYMS[i]] * C[i][j] * y[SYMS[j]]; return s; }
+    var A = quad(k, k), B = quad(k, n), Cc = quad(n, n);
+    if (A <= 1e-14) return 1;
+    var V1 = A + 2 * B + Cc; if (V1 <= 1e-14) return 1;
+    if ((A + B) / V1 <= q) return 1;
+    if (Cc <= 1e-14) return 0;
+    var K = (1 - q) * A, L = (1 - 2 * q) * B, disc = Math.sqrt(L * L + 4 * K * q * Cc);
+    var root = L >= 0 ? 2 * q * Cc / (disc + L) : (-L + disc) / (2 * K);
+    return clamp(root, 0, 1);
+  }
+
+  /* ---------- the constraint pipeline: every step after the projection only moves money down or to cash ---------- */
+  function enforce(p, ctx) {
+    var w = {}, cash = 0, by = { capacity: 0, gate: 0, cryptoRisk: 0, vol: 0, drawdown: 0 }, cut = {}, log = [];
+    SYMS.forEach(function (s) { w[s] = p[s]; cut[s] = 0; });
+    var ub = ctx.ubBallast || {}, uc = ctx.ubCash || {};
+    // 1. upper bounds whose excess is redeployed to ballast
+    var Eb = 0; SYMS.forEach(function (s) { if (ub[s] != null && w[s] > ub[s]) { var e = w[s] - ub[s]; w[s] = ub[s]; cut[s] += e; Eb += e; } });
+    // 2. NVDA look-through: moving NVDA into VOO lowers look-through by 0.92 per point, so the transfer is excess / 0.92
+    function look() { return w.NVDA * LOOK.NVDA + w.VOO * LOOK.VOO + w.SMH * LOOK.SMH; }
+    var L0 = look();
+    if (L0 > PARAMS.nvdaLookCap + 1e-12) {
+      var need = (L0 - PARAMS.nvdaLookCap) / (1 - LOOK.VOO), x = Math.min(w.NVDA, need);
+      var roomV = ub.VOO != null ? Math.max(0, ub.VOO - w.VOO) : Infinity, toV = Math.min(x, roomV);
+      w.NVDA -= x; cut.NVDA += x; w.VOO += toV; cash += x - toV; by.capacity += x - toV;
+      log.push('NVDA look-through ' + r2(L0) + '% above ' + PARAMS.nvdaLookCap + '%: moved ' + r2(x) + ' points of NVDA into VOO.');
+      var L1 = look(); if (L1 > PARAMS.nvdaLookCap + 1e-12) { var y = Math.min(w.SMH, (L1 - PARAMS.nvdaLookCap) / LOOK.SMH); w.SMH -= y; cut.SMH += y; cash += y; by.capacity += y; }
+    }
+    // 3. ballast fill, limited by the stock and gold sleeve ceilings and the look-through room
+    if (Eb > 1e-12) {
+      var st = sum(w, ['VOO', 'SMH', 'NVDA', 'MSFT', 'TSM', 'XLE']), go = w.IAUM + w.GDX;
+      var capV = Math.max(0, Math.min(sleeveLimits('stocks')[1] - st, (PARAMS.nvdaLookCap - look()) / LOOK.VOO, ub.VOO != null ? ub.VOO - w.VOO : Infinity));
+      var capG = Math.max(0, Math.min(sleeveLimits('gold')[1] - go, ub.IAUM != null ? ub.IAUM - w.IAUM : Infinity));
+      var addV = Math.min(Eb * PARAMS.ballast.VOO, capV), addG = Math.min(Eb * PARAMS.ballast.IAUM, capG);
+      var left = Eb - addV - addG, extraV = Math.min(left, capV - addV); addV += extraV; left -= extraV;
+      var extraG = Math.min(left, capG - addG); addG += extraG; left -= extraG;
+      w.VOO += addV; w.IAUM += addG;
+      if (left > 1e-9) { cash += left; by.capacity += left; log.push('Ballast was full (sleeve ceilings): ' + r2(left) + ' points went to cash instead of VOO and gold.'); }
+    }
+    // 4. gate bounds whose excess goes to cash
+    SYMS.forEach(function (s) { if (uc[s] != null && w[s] > uc[s]) { var e = w[s] - uc[s]; w[s] = uc[s]; cut[s] += e; cash += e; by.gate += e; } });
+    // 5. crypto share of risk, under every covariance scenario: smallest admissible scale wins
+    var aStar = 1;
+    if (ctx.cryptoCap != null) (ctx.shareScenarios || []).forEach(function (C) { aStar = Math.min(aStar, cryptoScale(w, C, ctx.cryptoCap)); });
+    if (aStar < 1 - 1e-9) {
+      var fr = 0; CRYPTO.forEach(function (s) { var e = w[s] * (1 - aStar); w[s] -= e; cut[s] += e; fr += e; }); cash += fr; by.cryptoRisk += fr;
+      log.push('Crypto carried more than ' + Math.round(ctx.cryptoCap * 100) + '% of risk: crypto scaled to ' + r2(aStar * 100) + '% of its weight, ' + r2(fr) + ' points to cash.');
+    }
+    // 6. volatility ceiling: uniform scale of every risky holding (keeps risk shares and every upper bound)
+    var sv = 1;
+    if (ctx.volCap != null && ctx.volC) { var vv = portRisk(w, SYMS, ctx.volC).vol; if (vv > ctx.volCap) sv = ctx.volCap / vv; }
+    if (sv < 1 - 1e-9) { var fr2 = 0; SYMS.forEach(function (s) { var e = w[s] * (1 - sv); w[s] -= e; cut[s] += e; fr2 += e; }); cash += fr2; by.vol += fr2; log.push('Volatility above ' + Math.round(ctx.volCap * 100) + '%: every holding scaled to ' + r2(sv * 100) + '%, ' + r2(fr2) + ' points to cash.'); }
+    // 7. optional drawdown overlay
+    if (ctx.ddMult != null && ctx.ddMult < 1) { var fr3 = 0; SYMS.forEach(function (s) { var e = w[s] * (1 - ctx.ddMult); w[s] -= e; cut[s] += e; fr3 += e; }); cash += fr3; by.drawdown += fr3; }
+    return { w: w, cash: cash, by: by, cut: cut, aStar: aStar, volScale: sv, log: log };
+  }
+
+  /* ---------- final verification ---------- */
+  function verify(w, cash, ctx) {
+    var tol = 1e-6, out = [], sl = { stocks: 0, gold: 0, crypto: 0 };
+    ASSETS.forEach(function (a) { sl[a.sleeve] += w[a.s]; });
+    var neg = SYMS.filter(function (s) { return w[s] < -tol; }); out.push({ k: 'No negative weights', v: neg.length, lim: 0, ok: !neg.length && cash >= -tol });
+    var bad = SYMS.filter(function (s) { return !isNum(w[s]); }); out.push({ k: 'All weights are finite numbers', v: bad.length, lim: 0, ok: !bad.length && isNum(cash) });
+    var tot = sum(w) + cash; out.push({ k: 'Weights plus cash = 100%', v: r4(tot), lim: 100, ok: Math.abs(tot - 100) < 1e-6 });
+    out.push({ k: 'BTC at most 10%', v: r2(w.BTC), lim: 10, ok: w.BTC <= 10 + tol });
+    ['stocks', 'gold', 'crypto'].forEach(function (k) { var L = sleeveLimits(k); out.push({ k: k.charAt(0).toUpperCase() + k.slice(1) + ' at most ' + L[1] + '%', v: r2(sl[k]), lim: L[1], ok: sl[k] <= L[1] + tol }); });
+    var lk = w.NVDA + LOOK.VOO * w.VOO + LOOK.SMH * w.SMH; out.push({ k: 'NVDA look-through at most 10%', v: r2(lk), lim: 10, ok: lk <= 10 + tol });
+    SYMS.forEach(function (s) { var u = Math.min(ctx.ubBallast[s] != null ? ctx.ubBallast[s] : Infinity, ctx.ubCash[s] != null ? ctx.ubCash[s] : Infinity); if (u < Infinity && s !== 'BTC') out.push({ k: s + ' within its gate limit', v: r2(w[s]), lim: r2(u), ok: w[s] <= u + tol }); });
+    if (ctx.cryptoCap != null) ctx.shareScenarios.forEach(function (C, i) { var rk = portRisk(w, SYMS, C); var sh = rk.v > 1e-12 ? cryptoShareOf(rk) : 0; out.push({ k: 'Crypto share of risk at most ' + Math.round(ctx.cryptoCap * 100) + '% (' + (i ? 'EWMA' : 'base') + ' model)', v: r4(sh), lim: ctx.cryptoCap, ok: sh <= ctx.cryptoCap + 1e-6 }); });
+    if (ctx.volCap != null) { var vb = portRisk(w, SYMS, ctx.volC).vol; out.push({ k: 'Volatility at most ' + Math.round(ctx.volCap * 100) + '% (base model)', v: r4(vb), lim: ctx.volCap, ok: vb <= ctx.volCap + 1e-6 }); }
+    ['stocks', 'gold', 'crypto'].forEach(function (k) { var L = sleeveLimits(k); var met = sl[k] >= L[0] - 1e-6; out.push({ k: k.charAt(0).toUpperCase() + k.slice(1) + ' at least ' + L[0] + '%', v: r2(sl[k]), lim: L[0], ok: true, relaxed: !met, note: met ? null : 'relaxed: money moved to cash by a gate or risk control' }); });
+    return out;
+  }
+
+  /* ---------- risk budgeting (Roncalli CCD) and clustering for the shadow portfolios ---------- */
+  function riskBudget(C, b) {
+    var n = b.length, y = []; for (var i = 0; i < n; i++) y.push(1 / Math.sqrt(C[i][i]));
+    for (var it = 0; it < 500; it++) {
+      var maxd = 0;
+      for (var k = 0; k < n; k++) {
+        var c = 0; for (var j = 0; j < n; j++) if (j !== k) c += C[k][j] * y[j];
+        var disc = Math.sqrt(c * c + 4 * C[k][k] * b[k]);
+        var ny = c > 0 ? 2 * b[k] / (disc + c) : (-c + disc) / (2 * C[k][k]);   // stable form when c > 0
+        maxd = Math.max(maxd, Math.abs(ny - y[k]) / (y[k] || 1)); y[k] = ny;
+      }
+      if (maxd < 1e-10) break;
+    }
+    var tot = y.reduce(function (s, v) { return s + v; }, 0);
+    return y.map(function (v) { return v / tot; });
+  }
+  function clusterAssets(corr, syms, K) {
+    var groups = syms.map(function (s, i) { return [i]; });
+    function dist(i, j) { return Math.sqrt(Math.max(0, 2 * (1 - corr[i][j]))); }
+    while (groups.length > K) {
+      var best = null;
+      for (var a = 0; a < groups.length; a++) for (var b = a + 1; b < groups.length; b++) {
+        var s = 0, c = 0; groups[a].forEach(function (i) { groups[b].forEach(function (j) { s += dist(i, j); c++; }); });
+        var d = s / c; if (!best || d < best.d) best = { a: a, b: b, d: d };
+      }
+      groups[best.a] = groups[best.a].concat(groups[best.b]); groups.splice(best.b, 1);
+    }
+    return groups.map(function (g) { return g.map(function (i) { return syms[i]; }); });
+  }
+
+  /* ---------- holdings: units x latest price ---------- */
+  function markHoldings(h, prices, longC) {
+    if (!h || !h.units) return null;
+    var val = {}, missingPx = [], tot = 0;
+    SYMS.forEach(function (s) {
+      var u = +h.units[s] || 0; if (!u) { val[s] = 0; return; }
+      var ser = prices[s] && prices[s].length ? prices[s] : longC[s];
+      var px = ser && ser.length ? ser[ser.length - 1].c : (h.px && h.px[s]) || null;
+      if (!px) { missingPx.push(s); val[s] = 0; return; }
+      val[s] = u * px; tot += val[s];
+    });
+    var cash = Math.max(0, +h.cash || 0); tot += cash;
+    if (tot <= 0) return null;
+    var pctW = {}; SYMS.forEach(function (s) { pctW[s] = val[s] / tot * 100; });
+    return { total: tot, value: val, pct: pctW, cashPct: cash / tot * 100, cash: cash, missingPx: missingPx, asOf: h.asOf || null };
+  }
+
+  /* ---------- input records and run status: fail closed ---------- */
+  // quality states from the October 16 technical whitepaper: observed, delayed, missing, inconsistent, proxy
+  function gradeInput(r, nowISO) {
+    var o = Object.assign({}, r);
+    o.ageDays = o.observedAt ? Math.max(0, Math.round((new Date(nowISO.slice(0, 10)) - new Date(o.observedAt.slice(0, 10))) / 864e5)) : null;
+    var old = !!o.tooOld || (o.hardAgeDays != null && o.ageDays != null && o.ageDays > o.hardAgeDays);
+    o.quality = !o.have ? 'missing' : o.inconsistent ? 'inconsistent' : o.proxy ? 'proxy'
+      : (o.fallback || old || (o.maxAgeDays != null && o.ageDays != null && o.ageDays > o.maxAgeDays)) ? 'delayed' : 'observed';
+    o.tooOld = old;
+    o.blocks = o.role === 'critical' && (o.quality === 'missing' || o.quality === 'inconsistent' || old);
+    return o;
+  }
+  // invalid when a required input, the gate, the risk model or a final check fails; degraded when an optional input is not observed
+  function assessRun(evidence, ctx) {
+    var blockers = [], degraded = [], blockedAsset = {}, gateBlocked = false;
+    evidence.forEach(function (r) {
+      if (r.blocks) {
+        blockers.push(r.label + ' ' + (r.quality === 'missing' ? 'missing' : r.quality === 'inconsistent' ? 'inconsistent' : 'too old' + (r.ageDays != null ? ' (' + r.ageDays + ' days)' : '')));
+        if (r.asset) blockedAsset[r.asset] = 1;
+        if (r.id === 'btcMonthly') gateBlocked = true;
+      } else if (r.role !== 'shown' && r.quality !== 'observed') degraded.push(r.label + ' ' + r.quality);
+    });
+    var miss = ctx.missing.filter(function (s) { return !blockedAsset[s]; });
+    if (miss.length) blockers.push('Too little price history for a signal: ' + miss.join(', '));
+    if (ctx.gateUnchecked && !gateBlocked) blockers.push('Monthly BTC gate could not be evaluated');
+    if (!ctx.riskOk) blockers.push('Risk model lacked aligned daily returns');
+    if (!ctx.checksOk) blockers.push('Final constraint check failed');
+    return { status: blockers.length ? 'invalid' : degraded.length ? 'degraded' : 'valid', blockers: blockers, degraded: degraded };
+  }
+
+  /* ---------- main ---------- */
+  function compute(inp, prev, ref, opts) {
+    if (ref === undefined) ref = prev;
+    opts = Object.assign({}, DEFAULT_OPTS, inp.policy || {}, opts || {});
+    var mw = opts.macro ? (opts.macroWeight != null ? opts.macroWeight : PARAMS.macroWeight) : 0;
+    var nowISO = (inp.now || new Date().toISOString()).slice(0, 10);
+    var notes = [], missing = [], syms = SYMS;
+    var prices = inp.prices || {}, longC = inp.cryptoLong || {};
+    var fed = inp.predictions ? fedOdds(inp.predictions, nowISO) : (inp.fedwatch ? fedWatchOdds(inp.fedwatch, nowISO) : null);
+    var sz = semisZ(prices);
+    var macro = macroScores(inp, nowISO, notes, { fed: fed, semisZ: sz });
+    if (mw > 0 && sz != null && Math.abs(sz) >= 1.5) notes.push('Semis ' + (sz > 0 ? 'leading' : 'lagging') + ' the S&P 500 (z ' + sz + '): stock macro score ' + (sz > 0 ? 'raised' : 'lowered') + '.');
+
+    // 1. signals and capital tilt; a missing signal means no tilt at all
+    var sig = {};
+    ASSETS.forEach(function (a) {
+      var o = assetSignal(a, prices, longC);
+      if (!o.ok) missing.push(a.s);
+      o.z = o.ok && opts.signals ? (1 - mw) * o.S + mw * macro[a.sleeve] : 0;
+      o.mult = clamp(Math.exp(PARAMS.kappa * o.z), PARAMS.multMin, PARAMS.multMax);
+      sig[a.s] = o;
+    });
+    var raw = {}; ASSETS.forEach(function (a) { raw[a.s] = a.base * sig[a.s].mult; });
+    var rs = sum(raw); SYMS.forEach(function (s) { raw[s] *= 100 / rs; });
+
+    // 2. gate states, read from prices before any weight is set
+    var gates = { alts: {} };
+    gates.altsReading = {}; gates.altGateOn = !!opts.altGate;
+    ALTS.forEach(function (s) { var o = sig[s], below = o.ok && o.p < o.sma && o.slope < 0; gates.altsReading[s] = below ? 'below' : 'clear'; gates.alts[s] = opts.altGate && below ? 'halved' : 'clear'; });
+    var flow = etfFlow(inp.global, prices.BTC);
+    var lb = longC.BTC, bd = prices.BTC;
+    if (lb && lb.length >= 70 && bd && bd.length >= 31) {
+      var smaB = mean(lb.slice(-70).map(function (x) { return x.c; }));
+      var pB = bd[bd.length - 1].c, sd30 = sd(logRets(bd.slice(-31).map(function (x) { return x.c; })));
+      var zB = Math.log(pB / smaB) / (sd30 * Math.sqrt(30)), SB = Phi(zB);
+      var reading = SB >= PARAMS.gradedWarn ? 'clear' : SB >= PARAMS.gradedCut ? 'trim' : 'cut';
+      gates.graded = { S: r2(SB), z: r2(zB), sma210: Math.round(smaB), price: Math.round(pB), sigma30: r4(sd30 * Math.sqrt(30)), flow: flow, reading: reading, on: !!opts.gradedGate, level: opts.gradedGate ? reading : 'off' };
+    } else gates.graded = { level: null, reading: null, on: !!opts.gradedGate, flow: flow };
+    var bm = inp.btcMonthly ? monthEndCloses(inp.btcMonthly, nowISO) : null;
+    var GM = PARAMS.gateMonths;
+    if (bm && bm.length >= GM) {
+      var last10 = bm.slice(-GM), sma10 = mean(last10.map(function (x) { return x.c; })), lastM = last10[last10.length - 1];
+      gates.btc = { on: opts.monthlyGate ? lastM.c >= sma10 : null, raw: lastM.c >= sma10, month: lastM.m, close: Math.round(lastM.c), sma10: Math.round(sma10), live: sig.BTC.p ? Math.round(sig.BTC.p) : null };
+    } else { gates.btc = { on: null }; if (opts.monthlyGate) notes.push('BTC monthly closes unavailable: gate not evaluated this run.'); }
+    var gradedLevel = gates.graded.level;
+    if (flow && flow.pct < PARAMS.flowThreshold) notes.push('Implied spot BTC ETF outflow of ' + Math.abs(flow.flowB) + 'B last week (shown only; it no longer moves the gate).');
+
+    // 3. smoothing of the signal tilt, before any constraint, against the raw tilt of a run 3 to 21 days old
+    var smoothed = false, pre = Object.assign({}, raw);
+    if (opts.smoothing && prev && prev.preRaw && prev.asOf) {
+      var age = (new Date(nowISO) - new Date(prev.asOf.slice(0, 10))) / 864e5;
+      var flip = (prev.gates && prev.gates.btc && prev.gates.btc.on !== gates.btc.on) || (prev.gates && prev.gates.graded && prev.gates.graded.level !== gates.graded.level);
+      if (age <= PARAMS.smoothDays && !flip) { SYMS.forEach(function (s) { pre[s] = PARAMS.smooth * raw[s] + (1 - PARAMS.smooth) * (prev.preRaw[s] || 0); }); smoothed = true; }
+    }
+    var p = projectSleeves(pre);
+
+    // 4. upper bounds: one bound per asset, the tightest wins; halvings never multiply
+    var ubB = { BTC: ASSET_CAP.BTC }, ubC = {};
+    ALTS.forEach(function (s) { if (gates.alts[s] === 'halved') ubB[s] = Math.min(ubB[s] != null ? ubB[s] : Infinity, 0.5 * p[s]); });
+    var monthlyOff = gates.btc.on === false;
+    if (!monthlyOff && gradedLevel === 'trim') {
+      var f = 0.5 + 0.5 * (gates.graded.S - PARAMS.gradedCut) / (PARAMS.gradedWarn - PARAMS.gradedCut);
+      ALTS.forEach(function (s) { ubB[s] = Math.min(ubB[s] != null ? ubB[s] : Infinity, f * p[s]); });
+      notes.push('Trend-distance gate at ' + gates.graded.S + ': alts capped at ' + Math.round(f * 100) + '% of their target, freed weight to VOO and gold.');
+    }
+    if (monthlyOff || (gradedLevel === 'cut')) {
+      ALTS.forEach(function (s) { ubC[s] = 0; }); ubC.BTC = 0.5 * Math.min(p.BTC, ASSET_CAP.BTC);
+      notes.push(monthlyOff ? 'BTC gate OFF: alts sold, BTC halved, proceeds to your interest accounts.' : 'Trend-distance gate below ' + PARAMS.gradedCut + ': alts sold and BTC halved ahead of the month-end close, proceeds to your interest accounts.');
+    }
+    var hold = markHoldings(inp.holdings, prices, longC);
+    if (hold) missing.forEach(function (s) { if (hold.missingPx.indexOf(s) < 0) ubB[s] = Math.min(ubB[s] != null ? ubB[s] : Infinity, Math.max(hold.pct[s], 0)); });
+
+    // 5. risk model and correlation stress
+    var RM = riskModel(prices, longC, syms);
+    var avgE = avgCorr(RM.Rraw.ewma, syms, RISK_SET), avgS = avgCorr(RM.Rraw.sample, syms, RISK_SET);
+    var spike = avgE != null && avgS != null && avgE - avgS > PARAMS.stressThreshold && avgE > 0.4;
+    var cryptoCap = spike ? PARAMS.cryptoRiskCapStress : PARAMS.cryptoRiskCap;
+    if (spike && opts.cryptoCap) notes.push('Correlation spike: risk assets now move together (EWMA ' + r2(avgE) + ' vs ' + r2(avgS) + ' over 63 days). Crypto risk cap tightened to ' + cryptoCap * 100 + '%.');
+    var dd = drawdownBudget(prices, longC);
+
+    // 6. enforce, then verify
+    var ctx = { ubBallast: ubB, ubCash: ubC, cryptoCap: opts.cryptoCap ? cryptoCap : null, shareScenarios: [RM.Cbase, RM.Cewma],
+      volCap: opts.volCap ? PARAMS.volCap : null, volC: RM.Cbase, ddMult: opts.ddOverlay && dd ? dd.m : null };
+    var E = enforce(p, ctx), w = E.w, outside = E.cash;
+    notes = notes.concat(E.log);
+    if (opts.ddOverlay && dd && dd.m < 1) notes.push('Drawdown overlay: base plan is ' + r2(dd.D * 100) + '% below its peak, risk scaled to ' + r2(dd.m * 100) + '%.');
+    var checks = verify(w, outside, ctx);
+    var failed = checks.filter(function (c) { return !c.ok; });
+    if (failed.length) notes.push('Constraint check failed: ' + failed.map(function (c) { return c.k; }).join(', ') + '.');
+    var relaxed = checks.filter(function (c) { return c.relaxed; }).map(function (c) { return c.k; });
+    var rk = portRisk(w, syms, RM.Cbase), rkE = portRisk(w, syms, RM.Cewma);
+
+    // 6b. run status: a required input, the gate, the risk model or a failed check blocks every action;
+    //     an optional input that is missing, delayed or a proxy only degrades the run
+    var D0 = macro.detail || {};
+    var evidence = (inp.evidence || []).map(function (r) {
+      var o = Object.assign({}, r);
+      if (o.id === 'real' && D0.realSource && /proxy/.test(D0.realSource)) { o.have = true; o.proxy = true; o.note = '10-year yield minus trailing CPI stands in for the TIPS yield'; }
+      if (o.id === 'fed' && !fed && D0.fedSource === 'Fed funds 6-month change') { o.have = true; o.proxy = true; o.note = 'Fed funds 6-month change stands in for FedWatch odds; it looks back, not ahead'; }
+      if (o.id === 'regime' && D0.regimeUnread) { o.inconsistent = true; o.note = 'answered, but no weekly or daily verdict was readable'; }
+      if (o.id === 'oi' && D0.oiFlag) { o.inconsistent = true; o.note = 'implausible 30-day change, excluded'; }
+      else if (o.id === 'oi' && D0.oi30d == null) o.have = false;
+      return gradeInput(o, nowISO);
+    });
+    var status = assessRun(evidence, { missing: missing, gateUnchecked: !!opts.monthlyGate && gates.btc.on == null, riskOk: !!RM.ar && isNum(rk.vol), checksOk: !failed.length });
+    var blocked = status.status === 'invalid';
+    if (blocked) notes.push('Fail closed: ' + status.blockers.length + ' blocker' + (status.blockers.length > 1 ? 's' : '') + ', so this run gives no actionable targets.');
+
+    // 7. actions: against marked holdings when entered, else the latest run, else the base plan
+    var basis = hold ? 'holdings' : ref && ref.weights ? 'last run' : 'base plan', actions = {};
+    ASSETS.forEach(function (a) {
+      var rv = hold ? hold.pct[a.s] : ref && ref.weights ? (ref.weights[a.s] || 0) : a.base, d = w[a.s] - rv, band = Math.max(PARAMS.bandAbs, PARAMS.bandRel * rv);
+      var forced = d < -0.05 && E.cut[a.s] > 0.05;   // reductions forced by a gate or risk control are never held back by the band
+      var act = blocked ? 'Blocked' : d > band ? 'Add' : (d < -band || forced) ? 'Trim' : 'Hold';
+      actions[a.s] = { ref: r2(rv), diff: r2(d), act: act, forced: !blocked && forced && d >= -band, usd: hold && !blocked ? Math.round(d / 100 * hold.total) : null };
+    });
+    var cashRef = hold ? hold.cashPct : ref && ref.outside != null ? ref.outside : 0;
+    actions.CASH = { ref: r2(cashRef), diff: r2(outside - cashRef), usd: hold && !blocked ? Math.round((outside - cashRef) / 100 * hold.total) : null };
+
+    // 8. events and posture
+    var events = FOMC.filter(function (fd) { var dd2 = (new Date(fd) - new Date(nowISO)) / 864e5; return dd2 >= 0 && dd2 <= 14; });
+    if (events.length) notes.push('FOMC decision ' + events[0] + ': stage new gold and SMH buys after the announcement.');
+    var avgMacro = (macro.stocks + macro.crypto + macro.gold) / 3, posture;
+    var defending = monthlyOff || gradedLevel === 'cut' || spike || E.by.cryptoRisk > 0.05 || E.by.vol > 0.05 || E.by.drawdown > 0.05;
+    if (defending) posture = { de: 'Hinhaltender Widerstand', en: 'Delaying defense: risk is being pulled back' };
+    else if (avgMacro <= -0.3) posture = { de: 'Elastische Verteidigung', en: 'Elastic defense: hold core, tilt toward ballast' };
+    else if (avgMacro >= 0.3) posture = { de: 'Bewegungskrieg', en: 'Maneuver: conditions favor adding risk' };
+    else posture = { de: 'Zeitgewinn', en: 'Gaining time: stage entries, no big moves' };
+    if (blocked) posture = { de: 'Lage unklar', en: 'Situation unclear: a required input or check failed, so this run gives no actionable targets' };
+
+    var sleeves = { gold: 0, stocks: 0, crypto: 0 }; ASSETS.forEach(function (a) { sleeves[a.sleeve] += w[a.s]; });
+    var mctr = {}; syms.forEach(function (x, i) { mctr[x] = rk.vol > 0 ? r4(rk.Cw[i] / rk.vol) : 0; });
+
+    // 9. shadows: equal risk, cluster risk parity, and the same pipeline with macro switched off
+    var shadows = null, clusters = null;
+    if (opts.shadows) {
+      clusters = clusterAssets(RM.Rsample, syms, 3);
+      var shadow = function (b) {
+        var wv = riskBudget(RM.Cbase, b), ws = {}; syms.forEach(function (x, i) { ws[x] = r2(wv[i] * 100); });
+        var rr = portRisk(ws, syms, RM.Cbase), sl = { gold: 0, stocks: 0, crypto: 0 }; ASSETS.forEach(function (a) { sl[a.sleeve] += ws[a.s]; });
+        return { weights: ws, vol: r4(rr.vol), cryptoShare: r4(cryptoShareOf(rr)), sleeves: { gold: r2(sl.gold), stocks: r2(sl.stocks), crypto: r2(sl.crypto) } };
+      };
+      var bERC = syms.map(function () { return 1 / syms.length; });
+      var bCRP = syms.map(function (x) { var g = clusters.filter(function (c) { return c.indexOf(x) >= 0; })[0]; return 1 / (clusters.length * g.length); });
+      shadows = { erc: shadow(bERC), crp: shadow(bCRP) };
+      if (mw > 0) {
+        var core = compute(inp, prev, ref, Object.assign({}, opts, { macro: false, shadows: false }));
+        shadows.core = { weights: core.weights, outside: core.outside, sleeves: core.sleeves, vol: core.risk.vol, cryptoShare: core.risk.cryptoShare };
+      }
+    }
+
+    // 10. output, rounded; cash takes the rounding remainder so the total is exactly 100
+    var wOut = {}; syms.forEach(function (s) { wOut[s] = r2(w[s]); });
+    var outsideR = r2(100 - sum(wOut));
+    if (outsideR < 0) { var big = syms.reduce(function (m, x) { return wOut[x] > wOut[m] ? x : m; }, syms[0]); wOut[big] = r2(wOut[big] + outsideR); outsideR = 0; }
+    var sigOut = {}; syms.forEach(function (s) { var o = sig[s]; sigOut[s] = { ok: o.ok, p: o.p != null ? r4(o.p) : null, sma: o.sma != null ? r4(o.sma) : null, T: r2(o.T), M: r2(o.M), S: r2(o.S), z: r2(o.z), mult: r2(o.mult), vol: o.vol != null ? r2(o.vol) : null, mom: o.mom != null ? r4(o.mom) : null, dist: o.dist != null ? r4(o.dist) : null }; });
+    var rcOut = {}; syms.forEach(function (s) { rcOut[s] = r4(rk.rc[s]); });
+    var rnd = function (o) { var r = {}; Object.keys(o).forEach(function (k) { r[k] = r2(o[k]); }); return r; };
+    var bounds = {}; syms.forEach(function (s) { var u = Math.min(ubB[s] != null ? ubB[s] : Infinity, ubC[s] != null ? ubC[s] : Infinity); if (u < Infinity) bounds[s] = r2(u); });
+    var corrOut = { syms: syms, m: RM.Rsample.map(function (row) { return row.map(r2); }), window: RM.ar63 ? { n: RM.ar63.n, from: RM.ar63.from, to: RM.ar63.to } : null };
+    return {
+      engine: VERSION, asOf: inp.now || new Date().toISOString(),
+      policy: { macroWeight: mw, kappa: PARAMS.kappa, ddOverlay: !!opts.ddOverlay, altGate: !!opts.altGate, gradedGate: !!opts.gradedGate, monthlyGate: !!opts.monthlyGate, cryptoCap: !!opts.cryptoCap, volCap: !!opts.volCap },
+      weights: wOut, outside: outsideR, outsideBy: rnd(E.by),
+      sleeves: { gold: r2(sleeves.gold), stocks: r2(sleeves.stocks), crypto: r2(sleeves.crypto) },
+      preRaw: rnd(raw), pre: rnd(p), bounds: bounds,
+      signals: sigOut, macro: macro, gates: gates,
+      risk: { vol: r4(rk.vol), volEwma: r4(rkE.vol), volSample: r4(portRisk(w, syms, RM.Csample).vol), volStress: r4(portRisk(w, syms, RM.Cstress).vol),
+        rc: rcOut, cryptoShare: r4(cryptoShareOf(rk)), cryptoShareEwma: r4(cryptoShareOf(rkE)), cryptoCap: cryptoCap,
+        nvdaLook: r2(w.NVDA + LOOK.VOO * w.VOO + LOOK.SMH * w.SMH), mctr: mctr,
+        C: RM.Cbase.map(function (row) { return row.map(function (v) { return Math.round(v * 1e6) / 1e6; }); }),
+        vols: syms.reduce(function (o, x) { o[x] = r4(RM.volL[x]); return o; }, {}),
+        volsEwma: syms.reduce(function (o, x) { o[x] = r4(RM.volE[x]); return o; }, {}),
+        shrink: { delta: r4(RM.delta), lw: RM.lwRaw != null ? r4(RM.lwRaw) : null, rbar: r4(RM.rbar), psd: RM.psd },
+        stress: { avgEwma: avgE != null ? r2(avgE) : null, avg63: avgS != null ? r2(avgS) : null, spike: spike }, dd: dd,
+        cryptoScale: r4(E.aStar), volScale: r4(E.volScale) },
+      checks: checks, checksOk: !failed.length, relaxed: relaxed,
+      shadows: shadows, clusters: clusters,
+      corr: corrOut, actions: actions, actionBasis: basis,
+      holdings: hold ? { total: Math.round(hold.total), pct: rnd(hold.pct), cashPct: r2(hold.cashPct), asOf: hold.asOf, missingPx: hold.missingPx } : null,
+      posture: posture, events: events, notes: notes, missing: missing, smoothed: smoothed,
+      status: status.status, blockers: status.blockers, degraded: status.degraded, evidence: evidence
+    };
+  }
+
+  var api = { VERSION: VERSION, fedWatchOdds: fedWatchOdds, riskBudget: riskBudget, clusterAssets: clusterAssets, fedOdds: fedOdds, Phi: Phi,
+    ASSETS: ASSETS, SLEEVES: SLEEVES, SLEEVE_BAND: SLEEVE_BAND, ASSET_CAP: ASSET_CAP, PARAMS: PARAMS, DEFAULT_OPTS: DEFAULT_OPTS, FOMC: FOMC, LOOK: LOOK,
+    parse: parse, compute: compute, regimeList: regimeList, monthEndCloses: monthEndCloses, gradeInput: gradeInput, assessRun: assessRun,
+    _internal: { enforce: enforce, verify: verify, cryptoScale: cryptoScale, projectSleeves: projectSleeves, psdCorr: psdCorr, jacobiEig: jacobiEig, ledoitWolf: ledoitWolf, portRisk: portRisk, cryptoShareOf: cryptoShareOf, markHoldings: markHoldings } };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ZE = api;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+(function(){
+'use strict';
+var ZE = window.ZE;
+var SRV = { TD:'Twelve Data', CD:'CoinDesk', CC:'Crypto.com', CMC:'CoinMarketCap', TQ:'TEXT TO QUANT', AV:'Alpha Vantage MCP Server', CV:'Coinversa Pulse', FC:'Firecrawl' };
+var EQ = ['VOO','SMH','NVDA','MSFT','TSM','XLE','IAUM','GDX'], CX = ['BTC','ETH','SOL','LINK'];
+var SLEEVE_COLOR = { stocks:'var(--stock)', gold:'var(--gold)', crypto:'var(--crypto)' };
+var state = { runs: [], current: null, running: false, db: null, mcp: null, holdings: null, policy: {}, lastPx: {}, meta: {}, blocked: null, perms: null, consent: [] };
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function f1(x){ return (x == null || !isFinite(x)) ? '–' : (Math.round(x*10)/10).toFixed(1); }
+function pct(x, d){ return (x == null || !isFinite(x)) ? '–' : (x*100).toFixed(d == null ? 1 : d) + '%'; }
+function sgn(x, d){ if (x == null || !isFinite(x)) return '–'; var v = (Math.round(x*Math.pow(10,d||1))/Math.pow(10,d||1)); return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d||1); }
+function money(x){ if (x == null) return '–'; return '$' + (Math.abs(x) >= 1000 ? Math.round(x).toLocaleString('en-US') : x.toFixed(2)); }
+function usd(x){ if (x == null || !isFinite(x)) return ''; var a = Math.abs(Math.round(x)); return (x > 0 ? '+' : x < 0 ? '−' : '') + '$' + a.toLocaleString('en-US'); }
+function when(iso){ try { var d = new Date(iso); return d.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }); } catch(e){ return iso; } }
+async function useCap(n){ try { return (window.claude && window.claude.use) ? await window.claude.use(n) : null; } catch(e){ return null; } }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+/* ---------- tabs ---------- */
+var tabs = ['lage','hold','hist','form','plan'];
+function showTab(k){ tabs.forEach(function(t){ $('t-'+t).setAttribute('aria-selected', t===k ? 'true' : 'false'); $('p-'+t).hidden = t !== k; }); try { localStorage.setItem('zl-tab', k); } catch(e){} }
+tabs.forEach(function(t){ $('t-'+t).addEventListener('click', function(){ showTab(t); }); });
+var hash = (location.hash || '').replace('#',''); var startTab = tabs.indexOf(hash) >= 0 ? hash : null;
+if (!startTab) { try { startTab = localStorage.getItem('zl-tab'); } catch(e){} }
+showTab(tabs.indexOf(startTab) >= 0 ? startTab : 'lage');
+
+/* ---------- base plan table ---------- */
+(function(){ var tb = $('baseTable').tBodies[0]; ZE.ASSETS.forEach(function(a){ var tr = document.createElement('tr'); tr.innerHTML = '<td><span class="tick">'+a.s+'</span><span class="sub">'+esc(a.name)+'</span></td><td class="r num">'+a.base+'%</td><td style="color:'+SLEEVE_COLOR[a.sleeve]+'">'+a.sleeve+'</td>'; tb.appendChild(tr); }); })();
+
+/* ---------- render a run (or the base plan) ---------- */
+function baseRun(){
+  var w = {}; ZE.ASSETS.forEach(function(a){ w[a.s] = a.base; });
+  return { base: true, weights: w, outside: 0, sleeves: { gold: 24, stocks: 56, crypto: 20 }, actions: null, signals: null };
+}
+function renderAlloc(run, mode){
+  var hist = !!(mode && mode.historical);
+  var s = run.sleeves, bar = $('allocBar'); bar.innerHTML = '';
+  [['stocks',s.stocks],['gold',s.gold],['crypto',s.crypto],['cash',run.outside||0]].forEach(function(x){
+    if (x[1] <= 0.05) return; var d = document.createElement('div'); d.style.width = x[1] + '%'; d.style.background = x[0]==='cash' ? 'var(--cash)' : SLEEVE_COLOR[x[0]]; d.textContent = x[1] >= 6 ? Math.round(x[1]) : ''; bar.appendChild(d);
+  });
+  bar.setAttribute('aria-label', 'Stocks ' + f1(s.stocks) + '%, gold ' + f1(s.gold) + '%, crypto ' + f1(s.crypto) + '%' + (run.outside > 0.05 ? ', interest accounts ' + f1(run.outside) + '%' : ''));
+  $('allocLegend').innerHTML = '<span><i class="sw" style="background:var(--stock)"></i>Stocks '+f1(s.stocks)+'%</span><span><i class="sw" style="background:var(--gold)"></i>Gold '+f1(s.gold)+'%</span><span><i class="sw" style="background:var(--crypto)"></i>Crypto '+f1(s.crypto)+'%</span>' + (run.outside > 0.05 ? '<span><i class="sw" style="background:var(--cash)"></i>To interest accounts '+f1(run.outside)+'%</span>' : '');
+  var tb = $('holdTable').tBodies[0]; tb.innerHTML = '';
+  var byHold = run.actionBasis === 'holdings';
+  ['stocks','gold','crypto'].forEach(function(sl){
+    var h = document.createElement('tr'); h.className = 'sl'; h.innerHTML = '<td colspan="5" style="color:'+SLEEVE_COLOR[sl]+'">'+sl.charAt(0).toUpperCase()+sl.slice(1)+' · '+f1(s[sl])+'%</td>'; tb.appendChild(h);
+    ZE.ASSETS.filter(function(a){ return a.sleeve === sl; }).forEach(function(a){
+      var act = run.actions ? run.actions[a.s] : null, sg = run.signals ? run.signals[a.s] : null;
+      var z = sg && sg.ok ? sg.z : null, zb = '';
+      if (z != null) { var wdt = Math.min(50, Math.abs(z)*50); zb = '<span class="zbar" title="score '+sgn(z,2)+'"><i style="'+(z>=0?'left:50%':'right:50%')+';width:'+wdt+'%;background:'+(z>=0?'var(--good)':'var(--bad)')+'"></i></span>'; }
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><span class="tick">'+a.s+'</span><span class="sub">'+esc(a.name)+(sg && !sg.ok ? ' · no data, no tilt' : '')+'</span>'+zb+'</td>'
+        + '<td class="r num hide-sm">'+a.base+'</td>'
+        + '<td class="r num"><b>'+f1(run.weights[a.s])+'</b></td>'
+        + '<td class="r num">'+(act && !hist ? sgn(act.diff) + (byHold && act.usd ? '<span class="usd">'+usd(act.usd)+'</span>' : '') : '–')+'</td>'
+        + '<td class="r">'+(hist ? '<span class="act Hist">History</span>' : act ? '<span class="act '+act.act+'">'+act.act+'</span>' + (act.forced ? '<span class="why">limit</span>' : '') : '<span class="act Hold">Base</span>')+'</td>';
+      tb.appendChild(tr);
+    });
+  });
+  if (run.outside > 0.05 || (run.actions && run.actions.CASH && Math.abs(run.actions.CASH.diff) > 0.05)) {
+    var c = hist ? null : run.actions && run.actions.CASH, tr = document.createElement('tr'); tr.className = 'sl';
+    var cTxt = c && c.diff > 0.05 ? 'move ' + (byHold && c.usd ? usd(c.usd).replace('+','') + ' ' : '') + 'out of the plan to here' : c && c.diff < -0.05 ? 'put ' + (byHold && c.usd ? usd(-c.usd).replace('+','') + ' ' : '') + 'from here to work in the plan' : '';
+    tr.innerHTML = '<td colspan="2" style="color:var(--cash)">Interest accounts' + (cTxt ? '<span class="sub" style="font-family:var(--body);font-weight:400">' + esc(cTxt) + '</span>' : '') + '</td><td class="r num">'+f1(run.outside)+'</td><td class="r num">'+(c ? sgn(c.diff) : '')+'</td><td></td>'; tb.appendChild(tr);
+  }
+}
+function tile(k, v, sub){ return '<div class="tile"><span class="k">'+k+'</span><span class="v">'+v+'</span>'+(sub ? '<span class="k">'+sub+'</span>' : '')+'</div>'; }
+function scoreMeter(label, v){ var w = Math.min(50, Math.abs(v)*50); return '<div class="meter"><span>'+label+'</span><span class="track"><span class="center"></span><i style="'+(v>=0?'left:50%':'right:50%')+';width:'+w+'%;background:'+(v>=0?'var(--good)':'var(--bad)')+'"></i></span><span class="num r" style="text-align:right">'+sgn(v,2)+'</span></div>'; }
+function renderChecks(run){
+  var box = $('checkBox'), b = $('checkBadge');
+  if (!run.checks) { box.className = 'empty'; box.textContent = 'This saved run predates the constraint check. Refresh to run version 3.'; b.className = 'badge mute'; b.textContent = 'not checked'; return; }
+  var bad = run.checks.filter(function(c){ return !c.ok; }), rel = run.checks.filter(function(c){ return c.relaxed; });
+  b.className = 'badge ' + (bad.length ? 'bad' : rel.length ? 'warn' : 'good'); b.textContent = bad.length ? bad.length + ' failed' : 'all ' + run.checks.filter(function(c){ return !c.relaxed; }).length + ' limits hold';
+  function fmt(c){ if (/share|Volatility/.test(c.k)) return pct(c.v, 1) + ' of ' + pct(c.lim, 0); if (/negative/.test(c.k)) return c.v ? c.v + ' negative' : 'none'; if (/finite/.test(c.k)) return c.v ? c.v + ' invalid' : 'all'; if (/= 100/.test(c.k)) return f1(c.v) + '%'; return f1(c.v) + '% of ' + c.lim + '%'; }
+  var rows = run.checks.map(function(c){ var ic = !c.ok ? '<span class="ic bad">✕</span>' : c.relaxed ? '<span class="ic rel">!</span>' : '<span class="ic ok">✓</span>'; return '<div class="row">'+ic+'<span>'+esc(c.k)+(c.note ? '<span class="sub">'+esc(c.note)+'</span>' : '')+'</span><span class="num muted">'+fmt(c)+'</span></div>'; });
+  var by = run.outsideBy || {}, parts = [['gate','BTC gate'],['cryptoRisk','crypto risk cap'],['vol','volatility ceiling'],['capacity','ballast full'],['drawdown','drawdown overlay']].filter(function(p){ return by[p[0]] > 0.05; }).map(function(p){ return f1(by[p[0]]) + ' from the ' + p[1]; });
+  box.className = ''; box.innerHTML = '<div class="checks">' + rows.slice(0, 6).join('') + '</div><details class="more"><summary>All ' + rows.length + ' checks</summary><div class="checks" style="margin-top:6px">' + rows.slice(6).join('') + '</div></details>'
+    + (parts.length ? '<p class="small">Cash raised: ' + esc(parts.join(', ')) + ' points.</p>' : '<p class="small muted">No limit had to move money to cash this run.</p>');
+}
+/* ---------- data quality and run status ---------- */
+function statusOf(r){ return r.status || (r.checks && r.checksOk === false ? 'invalid' : 'valid'); }
+function validRuns(){ return state.runs.filter(function(r){ return statusOf(r) !== 'invalid'; }); }
+function statusBadge(r){ if (!r.checks) return '<span class="badge mute">v2</span>'; var s = statusOf(r); return s === 'invalid' ? '<span class="badge bad">blocked</span>' : s === 'degraded' ? '<span class="badge warn">degraded</span>' : '<span class="badge good">valid</span>'; }
+function renderEvidence(run){
+  var box = $('dqBox'), b = $('dqBadge'), ev = run && run.evidence;
+  if (!ev || !ev.length) { box.className = 'empty'; box.textContent = 'This run predates the data-quality record. Refresh to see every input with its source, observation date and quality.'; b.className = 'badge mute'; b.textContent = 'not recorded'; return; }
+  var st = statusOf(run);
+  b.className = 'badge ' + (st === 'invalid' ? 'bad' : st === 'degraded' ? 'warn' : 'good'); b.textContent = st === 'invalid' ? 'blocked' : st;
+  var cnt = {}; ev.forEach(function(r){ cnt[r.quality] = (cnt[r.quality] || 0) + 1; });
+  var tally = ['observed','delayed','proxy','inconsistent','missing'].filter(function(q){ return cnt[q]; }).map(function(q){ return cnt[q] + ' ' + q; }).join(' · ');
+  function row(r){
+    var obs = r.observedAt ? 'observed ' + r.observedAt + (r.ageDays ? ', ' + r.ageDays + 'd ago' : '') : r.have ? 'no observation time from the provider' : null;
+    var sub = [r.source, r.units, obs, r.retrievedAt ? 'retrieved ' + when(r.retrievedAt) : null, r.note].filter(Boolean).join(' · ');
+    return '<div class="row"><span class="q ' + r.quality + (r.role !== 'critical' ? ' opt' : '') + '">' + r.quality + '</span><span>' + esc(r.label) + (r.blocks ? ' <b style="color:var(--bad)">· blocks the run</b>' : '') + '<span class="sub">' + esc(sub) + '</span></span></div>';
+  }
+  var issues = ev.filter(function(r){ return r.quality !== 'observed'; });
+  var groups = [['critical','Prices and gate input · required'],['optional','Macro inputs · optional, a gap counts as 0'],['shown','Shown only · no weight']];
+  var h = '<p class="small">' + esc(tally) + '.</p>';
+  h += issues.length ? '<div class="dq">' + issues.map(row).join('') + '</div>' : '<p class="small muted">Every input arrived on time from its primary source.</p>';
+  if (st === 'degraded') h += '<p class="small muted">Degraded runs stay actionable: a missing optional input counts as 0 and nothing is reweighted; proxies are labeled.</p>';
+  h += '<details class="more"><summary>All ' + ev.length + ' inputs</summary>' + groups.map(function(g){ var rs = ev.filter(function(r){ return r.role === g[0]; }); return rs.length ? '<h3 style="margin:10px 0 4px">' + g[1] + '</h3><div class="dq">' + rs.map(row).join('') + '</div>' : ''; }).join('') + '</details>';
+  box.className = ''; box.innerHTML = h;
+}
+// a blocked refresh never replaces the last valid run: that run stays on screen, labeled as history
+function renderLatest(latest){
+  latest = latest || state.runs[0]; if (!latest) return;
+  var card = $('blockedCard');
+  if (statusOf(latest) !== 'invalid') { state.blocked = null; card.hidden = true; renderRun(latest); return; }
+  state.blocked = latest;
+  var lv = validRuns().filter(function(r){ return r.asOf < latest.asOf; })[0] || null;
+  $('blockedWhen').textContent = 'refresh ' + when(latest.asOf);
+  $('blockedList').innerHTML = (latest.blockers && latest.blockers.length ? latest.blockers : ['Final constraint check failed']).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('');
+  var age = lv ? Math.round((Date.parse(latest.asOf) - Date.parse(lv.asOf)) / 864e5) : null;
+  $('blockedHist').textContent = lv ? 'Below is the last valid run, from ' + when(lv.asOf) + (age >= 1 ? ', ' + age + ' day' + (age === 1 ? '' : 's') + ' earlier' : '') + '. It is history, not an instruction: no Add or Trim is shown until a refresh passes. The data-quality card shows the blocked refresh.' : 'There is no earlier valid run, so the base plan is shown.';
+  card.hidden = false;
+  if (lv) renderRun(lv, { historical: true }); else renderRun(baseRun());
+  renderEvidence(latest);
+  $('statusLine').textContent = 'Refresh ' + when(latest.asOf) + ' blocked · ' + (lv ? 'showing ' + when(lv.asOf) + ' as history' : 'showing the base plan');
+}
+function renderRun(run, mode){
+  var hist = !!(mode && mode.historical);
+  state.current = run;
+  renderAlloc(run, mode);
+  if (run.base) return;
+  var P = run.posture || {};
+  $('postureEyebrow').textContent = (hist ? 'Historical · ' : 'Posture · ') + when(run.asOf) + (hist ? ' · not current' : '');
+  $('postureDe').textContent = P.de || '–';
+  $('postureEn').textContent = P.en || '';
+  var ch = [];
+  if (hist) ch.push('<span class="badge warn">Historical, no actions</span>');
+  else if (run.status === 'degraded') ch.push('<span class="badge warn">Degraded · ' + run.degraded.length + ' input' + (run.degraded.length > 1 ? 's' : '') + ' not observed</span>');
+  else if (run.status === 'valid') ch.push('<span class="badge good">Inputs complete</span>');
+  if (run.gates && run.gates.btc) ch.push(run.gates.btc.on === true ? '<span class="badge good">BTC gate ON</span>' : run.gates.btc.on === false ? '<span class="badge bad">BTC gate OFF</span>' : '<span class="badge mute">BTC gate not checked</span>');
+  if (run.checks) ch.push(run.checksOk ? '<span class="badge good">All limits hold</span>' : '<span class="badge bad">Limit check failed</span>');
+  if (run.events && run.events.length) ch.push('<span class="badge warn">FOMC '+esc(run.events[0].slice(5))+'</span>');
+  if (run.smoothed) ch.push('<span class="badge info">Signals averaged with last week</span>');
+  if (run.policy && run.policy.ddOverlay) ch.push('<span class="badge info">Drawdown overlay on</span>');
+  if (run.missing && run.missing.length) ch.push('<span class="badge warn">'+run.missing.length+' series missing</span>');
+  if (run.stale && run.stale.length) ch.push('<span class="badge warn">Saved data used: '+esc(run.stale.join(', '))+'</span>');
+  $('postureChips').innerHTML = ch.join('');
+  $('allocRef').textContent = hist ? 'historical run' : run.actionBasis === 'holdings' ? 'vs your holdings' + (run.holdings ? ', ' + money(run.holdings.total) : '') : (run.refLabel || 'vs last run');
+  renderChecks(run);
+  if (!hist) renderEvidence(run);
+  // gates
+  var g = run.gates || {}, gb = '';
+  if (g.btc && g.btc.on != null) {
+    gb += '<div class="tiles">' + tile('BTC '+esc(g.btc.month)+' close', money(g.btc.close)) + tile('10-month average', money(g.btc.sma10)) + tile('BTC now', money(g.btc.live), g.btc.live ? sgn((g.btc.live/g.btc.sma10-1)*100,1)+'% vs average' : '') + '</div>';
+    gb += '<p class="small">'+(g.btc.on ? 'The monthly gate is open: crypto keeps its weight. It is checked again at the next month-end close.' : 'The monthly gate is closed: alts are sold and BTC is halved until a month-end close returns above the average.')+'</p>';
+  } else gb += '<p class="small muted">BTC month-end data was unavailable, so the gate was not checked this run.</p>';
+  if (g.graded && g.graded.S != null) {
+    var G = g.graded, gOn = G.level && G.level !== 'off', rd = G.reading || G.level;
+    gb += '<h3 style="margin:6px 0 2px">Trend-distance gate · ' + (gOn ? 'switched on' : 'reading only') + '</h3><div class="gauge" role="img" aria-label="Trend-distance reading '+G.S+'"><span class="pin" style="left:'+(Math.max(0,Math.min(1,G.S))*100)+'%"></span></div><div class="gauge-scale"><span>0</span><span>0.2 exit</span><span>0.5 trim</span><span>1</span></div>';
+    gb += '<div class="tiles">' + tile('Reading', G.S.toFixed(2), rd === 'clear' ? 'clear' : rd === 'trim' ? 'trim zone' : 'exit zone') + tile('210-day average', money(G.sma210 || G.ema200), sgn(G.z,2)+' sd from it') + tile('Spot ETF flow', G.flow ? sgn(G.flow.flowB,2)+'B' : '–', G.flow ? 'implied, shown only' : 'unavailable') + '</div>';
+  }
+  if (g.alts) { var rdA = g.altsReading || g.alts, on = g.altGateOn; gb += '<div class="chips">' + Object.keys(rdA).map(function(k){ var below = rdA[k] === 'below' || g.alts[k] === 'halved'; return '<span class="badge '+(below ? 'warn' : 'good')+'">'+k+' '+(below ? (on ? 'halved' : 'below falling average') : 'trend clear')+'</span>'; }).join('') + (on === false ? '<span class="badge mute">alt gate switched off</span>' : '') + '</div>'; }
+  var gbx = $('gateBox'); gbx.className = ''; gbx.innerHTML = gb;
+  // risk
+  var r = run.risk || {}, rb = '';
+  var st = r.stress || {}, ddb = r.dd, sh = r.shrink;
+  rb += '<div class="tiles">' + tile('Volatility', pct(r.vol), r.volEwma != null ? 'EWMA ' + pct(r.volEwma) + ' · stress ' + pct(r.volStress) : 'cap 24%')
+    + tile('Crypto share of risk', pct(r.cryptoShare,0), 'cap ' + Math.round((r.cryptoCap||0.6)*100) + '%' + (r.cryptoShareEwma != null ? ' · EWMA ' + pct(r.cryptoShareEwma,0) : ''))
+    + tile('NVDA look-through', f1(r.nvdaLook)+'%', 'cap 10%')
+    + tile('Correlation stress', st.avgEwma != null ? st.avgEwma.toFixed(2) : '–', st.spike ? 'SPIKE vs ' + st.avg63 + ' normal' : st.avg63 != null ? 'normal ' + st.avg63.toFixed(2) : '')
+    + tile('Base plan drawdown', ddb ? pct(ddb.D) : '–', ddb ? (run.policy && run.policy.ddOverlay ? (ddb.m < 1 ? 'overlay: risk at ' + pct(ddb.m,0) : 'overlay on, inside 10%') : 'overlay off, shown only') : 'needs price history')
+    + (sh ? tile('Correlation shrinkage', pct(sh.delta,0), 'toward avg ' + (sh.rbar != null ? sh.rbar.toFixed(2) : '–') + (sh.psd && sh.psd.base ? ' · repaired' : '')) : '') + '</div>';
+  if (r.rc) {
+    var mx = 0; Object.keys(r.rc).forEach(function(k){ mx = Math.max(mx, r.rc[k]); }); mx = Math.max(mx, 0.01);
+    rb += '<div class="meter small muted" style="grid-template-columns:72px 1fr 44px 64px"><span>Holding</span><span>Share of risk</span><span></span><span style="text-align:right">+1% adds</span></div>';
+    rb += '<div style="display:flex;flex-direction:column;gap:6px">' + ZE.ASSETS.map(function(a){ var v = r.rc[a.s] || 0, mc = r.mctr ? r.mctr[a.s] : null; return '<div class="meter" style="grid-template-columns:72px 1fr 44px 64px"><span class="tick">'+a.s+'</span><span class="track"><i style="left:0;width:'+(Math.max(0,v)/mx*100)+'%;background:'+SLEEVE_COLOR[a.sleeve]+'"></i></span><span class="num" style="text-align:right">'+pct(v,0)+'</span><span class="num muted" style="text-align:right">'+(mc != null ? '+' + (mc).toFixed(2) + ' pt' : '–')+'</span></div>'; }).join('') + '</div><p class="small muted">Right column: how many points of portfolio volatility one more percent of that holding adds (Euler marginal risk). Stress assumes every pair correlates at 0.8 and is shown, not enforced.</p>';
+  }
+  var rbx = $('riskBox'); rbx.className = ''; rbx.innerHTML = rb;
+  renderLens(run);
+  // macro
+  var m = run.macro || {}, d = m.detail || {}, mb = '';
+  mb += '<div style="display:flex;flex-direction:column;gap:7px">' + scoreMeter('Stocks', m.stocks||0) + scoreMeter('Gold', m.gold||0) + scoreMeter('Crypto', m.crypto||0) + '</div>';
+  mb += '<p class="small muted">Macro carries ' + Math.round(((run.policy && run.policy.macroWeight) != null ? run.policy.macroWeight : 0.2)*100) + '% of each score; price trend and momentum carry the rest.</p>';
+  mb += '<div class="tiles" style="margin-top:4px">'
+    + tile('10-year yield', d.tsy10 != null ? d.tsy10.toFixed(2)+'%' : '–', d.tsy10Chg3m != null ? sgn(d.tsy10Chg3m,2)+' pts in 3 mo' : '')
+    + tile('Real yield', d.realYield != null ? d.realYield.toFixed(2)+'%' : '–', (d.realYieldChg3m != null ? sgn(d.realYieldChg3m,2)+' pts in 3 mo · ' : '') + (d.realSource && /TIPS/.test(d.realSource) ? 'TIPS' : 'proxy'))
+    + tile('Fed funds', d.fedFunds != null ? d.fedFunds.toFixed(2)+'%' : '–', d.fedFundsChg6m != null ? sgn(d.fedFundsChg6m,2)+' pts in 6 mo' : '')
+    + tile('CPI inflation', d.cpiYoY != null ? d.cpiYoY.toFixed(1)+'%' : '–', 'year over year')
+    + (d.fedOdds ? d.fedOdds.meetings.slice(0,1).map(function(mt){ return tile('Fed ' + new Date(mt.date+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric'}), 'hike ' + Math.round(mt.hike*100) + '%', 'hold ' + Math.round(mt.hold*100) + '% · cut ' + Math.round(mt.cut*100) + '%'); }).join('') : '')
+    + tile('Semis vs S&P 500', d.semisZ != null ? sgn(d.semisZ,2) + ' z' : '–', d.semisZ == null ? '50-day relative strength' : d.semisZ >= 1.5 ? 'leading: risk on' : d.semisZ <= -1.5 ? 'lagging: risk off' : 'neutral band')
+    + tile('Crypto regime', (d.regime1w||'–') + ' / ' + (d.regime1d||'–'), 'weekly / daily')
+    + tile('Leverage', d.oiNet30d != null ? sgn(d.oiNet30d,1)+'%' : (d.oi30d != null ? sgn(d.oi30d,1)+'%' : '–'), d.mcap30d != null ? 'open interest ' + sgn(d.oi30d,1) + '% vs market cap ' + sgn(d.mcap30d,1) + '%' : '30-day open interest change')
+    + tile('Fear & Greed', d.fearGreed != null ? d.fearGreed : '–', 'shown only' + (d.altSeason != null ? ' · altseason '+d.altSeason : ''))
+    + tile('Smart vs crowd', d.smartBias != null ? sgn(d.smartBias,2)+' / '+sgn(d.crowdBias,2) : '–', 'Hyperliquid, shown only')
+    + '</div><p class="small muted">Fed policy input: ' + esc(d.fedSource || '–') + (d.fedOdds ? ', expected change ' + sgn(d.fedOdds.cumExp*100,0) + ' bp at the next meeting' : '') + '. Real yield: ' + esc(d.realSource || 'unavailable') + '. Fear &amp; Greed and wallet positioning carry no weight under the Zobiris evidence rule.</p>';
+  var mbx = $('macroBox'); mbx.className = ''; mbx.innerHTML = mb;
+  // correlations
+  if (run.corr && run.corr.m) {
+    var syms = run.corr.syms, M = run.corr.m, h = '<table class="hm"><thead><tr><th></th>' + syms.map(function(s){ return '<th>'+s.slice(0,4)+'</th>'; }).join('') + '</tr></thead><tbody>';
+    syms.forEach(function(s, i){ h += '<tr><th style="text-align:right;padding-right:4px">'+s+'</th>' + M[i].map(function(v, j){ var a = i===j ? 0 : Math.min(1, Math.abs(v)); var col = v >= 0 ? 'var(--bad)' : 'var(--accent)'; return '<td style="background:color-mix(in srgb,'+col+' '+Math.round(a*70)+'%,var(--sunk))" title="'+s+' · '+syms[j]+': '+v.toFixed(2)+'">'+(i===j?'':v.toFixed(1).replace('0.','.'))+'</td>'; }).join('') + '</tr>'; });
+    h += '</tbody></table><p class="small muted" style="margin-top:8px">Red means the pair moves together; blue means it offsets. Pairs without fresh data use the average correlation, and the grid is repaired to a valid matrix when needed.</p>';
+    $('corrBox').innerHTML = h;
+    $('corrWin').textContent = run.corr.window ? run.corr.window.n + ' trading days to ' + run.corr.window.to : 'default correlations';
+  }
+  // notes
+  var notes = (run.notes || []).slice(); if (run.missing && run.missing.length) notes.push('No usable signal for ' + run.missing.join(', ') + ': those holdings get no tilt' + (run.actionBasis === 'holdings' ? ' and cannot rise above what you hold.' : '.'));
+  if (run.holdings && run.holdings.missingPx && run.holdings.missingPx.length) notes.push('No live price for ' + run.holdings.missingPx.join(', ') + ', so those holdings were valued at zero.');
+  if (run.sourceNotes) notes = notes.concat(run.sourceNotes);
+  if (!notes.length) notes.push('No caps or gates triggered. Weights are the plain formula output.');
+  $('notesList').innerHTML = notes.map(function(n){ return '<li>'+esc(n)+'</li>'; }).join('');
+  $('statusLine').textContent = 'Last run ' + when(run.asOf) + (run.savedNote ? ' · ' + run.savedNote : '');
+}
+
+/* ---------- risk-budget lens ---------- */
+function riskOf(w, C){ var syms = ZE.ASSETS.map(function(a){ return a.s; }), n = syms.length, Cw = [], v = 0;
+  for (var i = 0; i < n; i++){ var s = 0; for (var j = 0; j < n; j++) s += C[i][j] * (w[syms[j]]||0) / 100; Cw.push(s); }
+  for (var k = 0; k < n; k++) v += (w[syms[k]]||0) / 100 * Cw[k];
+  var cs = 0; ['BTC','ETH','SOL','LINK'].forEach(function(x){ var i = syms.indexOf(x); cs += v > 0 ? (w[x]||0)/100*Cw[i]/v : 0; });
+  return { vol: Math.sqrt(Math.max(v,0)), cryptoShare: cs }; }
+function sleevesOf(w){ var s = { stocks:0, gold:0, crypto:0 }; ZE.ASSETS.forEach(function(a){ s[a.sleeve] += w[a.s]||0; }); return s; }
+function renderLens(run){
+  var box = $('lensBox'); if (!run.shadows || !run.risk || !run.risk.C) return;
+  var L = run.shadows, cols = [['Lagebild', { weights: run.weights, sleeves: run.sleeves, vol: run.risk.vol, cryptoShare: run.risk.cryptoShare, outside: run.outside }]];
+  if (L.core) cols.push(['No macro', L.core]);
+  cols.push(['Equal risk', L.erc], ['Clusters', L.crp]);
+  var rows = [['Stocks', function(c){ return f1(c.sleeves.stocks)+'%'; }], ['Gold', function(c){ return f1(c.sleeves.gold)+'%'; }], ['Crypto', function(c){ return f1(c.sleeves.crypto)+'%'; }], ['Cash', function(c){ return f1(c.outside || 0)+'%'; }], ['BTC', function(c){ return f1(c.weights.BTC)+'%'; }], ['SOL', function(c){ return f1(c.weights.SOL)+'%'; }], ['Volatility', function(c){ return pct(c.vol); }], ['Crypto risk', function(c){ return pct(c.cryptoShare,0); }]];
+  var h = '<div class="tw"><table class="lens"><thead><tr><th></th>' + cols.map(function(c){ return '<th class="r">'+c[0]+'</th>'; }).join('') + '</tr></thead><tbody>'
+    + rows.map(function(r){ return '<tr><td>'+r[0]+'</td>' + cols.map(function(c,i){ return '<td class="r num'+(i===0?' hl':'')+'">'+r[1](c[1])+'</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+  if (L.core) { var mv = 0; ZE.ASSETS.forEach(function(a){ mv += Math.abs((run.weights[a.s]||0) - (L.core.weights[a.s]||0)); }); h += '<p class="small">Macro moves ' + f1(mv/2) + ' points of the portfolio this run. In the 2021 to 2026 replay, macro at 0.2 changed the certainty-equivalent return by only 0.3 points, which is noise.</p>'; }
+  var btcCl = (run.clusters||[]).filter(function(c){ return c.indexOf('BTC') >= 0; })[0] || [];
+  h += '<p class="small"><b>Clusters the data found this run:</b> ' + (run.clusters||[]).map(function(c){ return '<span class="badge mute" style="margin:2px 4px 2px 0">'+esc(c.join(' · '))+'</span>'; }).join('') + '</p>';
+  var mates = btcCl.filter(function(x){ return ['ETH','SOL','LINK','BTC'].indexOf(x) < 0; });
+  h += '<p class="small muted">' + (mates.length ? 'BTC is clustering with ' + esc(mates.join(', ')) + ' right now, so it is not acting as a separate diversifier.' : 'BTC is clustering only with other crypto right now, so it still behaves as its own asset class.') + '</p>';
+  h += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px"><label for="blendTarget" class="small">Blend toward</label><select id="blendTarget"><option value="crp">Cluster risk parity</option><option value="erc">Equal risk contribution</option></select>'
+    + '<label for="blendSlider" class="small">Blend amount: <b id="blendPct" class="num">0%</b></label><input type="range" id="blendSlider" min="0" max="100" step="5" value="0">'
+    + '<div class="blendout" id="blendOut"></div><p class="small muted">A what-if tool: it does not change your targets, and a blend is not checked against your limits.</p></div>';
+  box.className = ''; box.innerHTML = h;
+  function upd(){
+    var lam = (+$('blendSlider').value) / 100, tgt = L[$('blendTarget').value].weights, w = {};
+    ZE.ASSETS.forEach(function(a){ w[a.s] = (1-lam) * (run.weights[a.s]||0) + lam * (tgt[a.s]||0); });
+    var rk = riskOf(w, run.risk.C), sl = sleevesOf(w);
+    $('blendPct').textContent = Math.round(lam*100) + '%';
+    $('blendOut').innerHTML = tile('Stocks', f1(sl.stocks)+'%') + tile('Gold', f1(sl.gold)+'%') + tile('Crypto', f1(sl.crypto)+'%') + tile('Volatility', pct(rk.vol)) + tile('Crypto risk', pct(rk.cryptoShare,0));
+  }
+  $('blendSlider').addEventListener('input', upd); $('blendTarget').addEventListener('change', upd); upd();
+}
+
+/* ---------- history ---------- */
+function lineChart(el, series, yMin, yMax, fmt){
+  var runs = series[0].pts.length; if (runs < 2) { el.innerHTML = '<div class="empty">The chart appears after two saved runs. '+runs+' so far.</div>'; return; }
+  var W = 640, H = 220, L = 40, R = 12, T = 10, B = 26;
+  function x(i){ return L + (W-L-R)*i/(runs-1); } function y(v){ return T + (H-T-B)*(1-(v-yMin)/(yMax-yMin)); }
+  var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="History chart">';
+  var ticks = 4; for (var k = 0; k <= ticks; k++){ var v = yMin + (yMax-yMin)*k/ticks; s += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" text-anchor="end">'+fmt(v)+'</text>'; }
+  var lbl = series[0].labels; [0, runs-1].forEach(function(i){ s += '<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="'+(i===0?'start':'end')+'">'+esc(lbl[i])+'</text>'; });
+  series.forEach(function(se){ var d = ''; se.pts.forEach(function(v, i){ if (v == null) return; d += (d ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; }); s += '<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.2" stroke-linejoin="round"/>'; var lv = se.pts[runs-1]; if (lv != null) s += '<circle cx="'+x(runs-1)+'" cy="'+y(lv)+'" r="3.5" fill="'+se.color+'"/>'; });
+  el.innerHTML = s + '</svg>';
+}
+function corrOf(run, a, b){ if (!run.corr || !run.corr.m) return null; var i = run.corr.syms.indexOf(a), j = run.corr.syms.indexOf(b); return i < 0 || j < 0 ? null : run.corr.m[i][j]; }
+function renderHistory(){
+  var runs = validRuns().slice().reverse();   // blocked refreshes stay out of the charts but appear in the log
+  $('histCount').textContent = state.runs.length ? state.runs.length + ' saved run' + (state.runs.length > 1 ? 's' : '') : '';
+  var labels = runs.map(function(r){ return new Date(r.asOf).toLocaleDateString('en-US', { month:'short', day:'numeric' }); });
+  if (runs.length) {
+    lineChart($('histSleeve'), [
+      { color:'var(--stock)', pts: runs.map(function(r){ return r.sleeves.stocks; }), labels: labels },
+      { color:'var(--gold)', pts: runs.map(function(r){ return r.sleeves.gold; }) },
+      { color:'var(--crypto)', pts: runs.map(function(r){ return r.sleeves.crypto; }) },
+      { color:'var(--cash)', pts: runs.map(function(r){ return r.outside || 0; }) }
+    ], 0, 70, function(v){ return Math.round(v)+'%'; });
+    lineChart($('histCorr'), [
+      { color:'var(--crypto)', pts: runs.map(function(r){ return corrOf(r,'BTC','IAUM'); }), labels: labels },
+      { color:'var(--stock)', pts: runs.map(function(r){ return corrOf(r,'BTC','VOO'); }) },
+      { color:'var(--gold)', pts: runs.map(function(r){ return corrOf(r,'IAUM','VOO'); }) },
+      { color:'var(--bad)', pts: runs.map(function(r){ return r.risk && r.risk.stress ? r.risk.stress.avgEwma : null; }) }
+    ], -1, 1, function(v){ return v.toFixed(1); });
+  }
+  if (state.runs.length) {
+    var tb = $('runTable').tBodies[0];
+    tb.innerHTML = state.runs.map(function(r){ var g = r.gates && r.gates.btc ? r.gates.btc.on : null; return '<tr><td class="num">'+esc(when(r.asOf))+'</td><td class="hide-sm">'+esc(r.posture ? r.posture.de : '')+'</td><td class="r num">'+f1(r.sleeves.crypto)+'%</td><td class="r num">'+f1(r.outside||0)+'%</td><td class="r num hide-sm">'+pct(r.risk && r.risk.vol)+'</td><td class="r">'+(g===true?'<span class="badge good">ON</span>':g===false?'<span class="badge bad">OFF</span>':'–')+'</td><td class="r">'+statusBadge(r)+'</td></tr>'; }).join('');
+  }
+}
+
+/* ---------- storage ---------- */
+function runsSub(){
+  var db = state.db; if (!db) return;
+  db.collection('runs').orderBy('asOf','desc').limit(60).onSnapshot(function(snap){
+    state.runs = snap.docs.map(function(d){ return d.data(); }).filter(function(r){ return r && r.weights; });
+    if (state.runs.length && !state.running) renderLatest();
+    renderHistory();
+  }, function(e){ $('statusLine').textContent = 'Saved runs unavailable (' + e.code + ').'; });
+}
+async function getDoc(path){ if (!state.db) return null; try { var s = await state.db.doc(path).get(); return s.exists ? s.data() : null; } catch(e){ return null; } }
+async function setDoc(path, data){ if (!state.db) return false; try { await state.db.doc(path).set(data); return true; } catch(e){ return e.code || 'error'; } }
+
+/* ---------- holdings and policy ---------- */
+(function(){
+  var g = $('holdGrid'); g.innerHTML = ZE.ASSETS.map(function(a){ return '<label>'+a.s+' '+(a.kind==='cx'?'coins':'shares')+'<input type="number" inputmode="decimal" min="0" step="any" id="hu-'+a.s+'" placeholder="0"></label>'; }).join('') + '<label>Cash for this plan, $<input type="number" inputmode="decimal" min="0" step="any" id="hu-CASH" placeholder="0"></label>';
+  ZE.ASSETS.concat([{ s:'CASH' }]).forEach(function(a){ $('hu-'+a.s).addEventListener('input', holdPreview); });
+})();
+function holdRead(){ var u = {}, any = false; ZE.ASSETS.forEach(function(a){ var v = parseFloat($('hu-'+a.s).value); if (isFinite(v) && v > 0) { u[a.s] = v; any = true; } }); var c = parseFloat($('hu-CASH').value); return { units: u, cash: isFinite(c) && c > 0 ? c : 0, any: any || (isFinite(c) && c > 0) }; }
+function holdFill(h){ ZE.ASSETS.forEach(function(a){ $('hu-'+a.s).value = h && h.units && h.units[a.s] ? h.units[a.s] : ''; }); $('hu-CASH').value = h && h.cash ? h.cash : ''; holdPreview(); }
+function holdPreview(){ var h = holdRead(), tot = h.cash, miss = []; Object.keys(h.units).forEach(function(s){ var p = state.lastPx[s]; if (p) tot += h.units[s] * p; else miss.push(s); });
+  $('holdMsg').textContent = h.any ? 'about ' + money(tot) + ' at the last saved prices' + (miss.length ? ' (no price yet for ' + miss.join(', ') + ')' : '') : ''; }
+$('holdSave').addEventListener('click', async function(){
+  var h = holdRead(); var doc = { units: h.units, cash: h.cash, asOf: new Date().toISOString(), px: {} };
+  Object.keys(h.units).forEach(function(s){ if (state.lastPx[s]) doc.px[s] = state.lastPx[s]; });
+  var ok = await setDoc('settings/holdings', h.any ? doc : { units: {}, cash: 0, asOf: doc.asOf, px: {} });
+  state.holdings = h.any ? doc : null;
+  $('holdStamp').textContent = h.any ? 'saved ' + when(doc.asOf) : 'optional';
+  $('holdMsg').textContent = ok === true ? 'Saved. The next Refresh compares targets with these holdings.' : 'Could not save (' + (ok || 'storage unavailable in this view') + ').';
+});
+$('holdClear').addEventListener('click', function(){ holdFill(null); });
+function policyFill(p){ $('pol-dd').checked = !!p.ddOverlay; $('pol-alt').checked = !!p.altGate; $('pol-graded').checked = !!p.gradedGate; }
+['pol-dd','pol-alt','pol-graded'].forEach(function(id){ $(id).addEventListener('change', async function(){
+  state.policy = { ddOverlay: $('pol-dd').checked, altGate: $('pol-alt').checked, gradedGate: $('pol-graded').checked, updatedAt: new Date().toISOString() };
+  var ok = await setDoc('settings/policy', state.policy);
+  $('policyMsg').textContent = ok === true ? 'Saved. The switches apply at your next Refresh.' : 'Could not save (' + (ok || 'storage unavailable in this view') + '); the switches apply to this session only.';
+}); });
+
+/* ---------- connector calls ---------- */
+function errText(e, server){
+  var c = e && e.code;
+  if (c === 'needs_reauth') return 'Reconnect ' + server + ' in claude.ai Settings → Connectors';
+  if (c === 'server_not_connected' || c === 'selection_required') return 'Add ' + server + ' in claude.ai Settings → Connectors';
+  if (c === 'approval_required') return 'Needs approval on each call (see Holdings)';
+  if (c === 'not_in_manifest' || c === 'consent_required') return 'Not allowed for this page (see Holdings)';
+  if (c === 'blocked_by_policy') return 'Blocked by your organization';
+  if (e && e.rateLimited) return 'Rate limited by the provider';
+  if (c === 'tool_error') return 'Provider error: ' + String(e.message || '').slice(0, 80);
+  return 'Did not respond';
+}
+async function call(server, tool, input){
+  var mcp = state.mcp;
+  try { var r = await mcp.callTool(server, tool, input, { cache: false }); return r.payload !== undefined ? r.payload : r; }
+  catch (e) {
+    if (e && /^(approval_required|not_in_manifest|consent_required)$/.test(e.code) && state.consent.indexOf(server) < 0) state.consent.push(server);
+    if (e && e.retryable) { await sleep(Math.min(e.retryAfterMs || 2500 + Math.random()*1500, 15000)); var r2 = await mcp.callTool(server, tool, input, { cache: false }); return r2.payload !== undefined ? r2.payload : r2; }
+    throw e;
+  }
+}
+/* ---------- connector access: one batched consent dialog instead of a prompt per connector ---------- */
+var CONNECTORS = [
+  [SRV.TD, 'get_time_series', 'ETF closes'],
+  [SRV.CD, 'fetch_index_ohlcv', 'crypto closes'],
+  [SRV.CC, 'get_candlestick', 'crypto fallback'],
+  [SRV.AV, 'TREASURY_YIELD, CPI, FEDERAL_FUNDS_RATE, DIGITAL_CURRENCY_MONTHLY', 'yields, CPI, Fed funds, BTC month-end closes'],
+  [SRV.FC, 'firecrawl_scrape', 'FRED real yield, FedWatch odds'],
+  [SRV.TQ, 'market_regime', 'crypto regime'],
+  [SRV.CMC, 'get_global_metrics_latest', 'leverage, Fear & Greed'],
+  [SRV.CV, 'live_cohort_bias', 'positioning, shown only']
+];
+var ACCESS = { granted: ['observed', 'allowed'], prompt: ['delayed', 'will ask'], denied: ['missing', 'blocked'], unavailable: ['missing opt', 'unavailable'] };
+async function renderAccess(map){
+  var p = state.perms, box = $('accessList');
+  if (!p) { box.innerHTML = '<p class="small muted">Permissions cannot be read in this view. Use the Permissions item in this artifact\'s menu.</p>'; $('accessAllow').hidden = true; $('accessManage').hidden = true; return; }
+  var states = await Promise.all(CONNECTORS.map(function(c){ var k = 'mcp:' + c[0]; return map && map[k] ? map[k] : p.state(k).catch(function(){ return 'unavailable'; }); }));
+  var n = states.filter(function(x){ return x === 'granted'; }).length;
+  $('accessSum').textContent = n + ' of ' + CONNECTORS.length + ' allowed';
+  box.innerHTML = CONNECTORS.map(function(c, i){ var a = ACCESS[states[i]] || ACCESS.unavailable; return '<div class="row"><span class="q ' + a[0] + '">' + a[1] + '</span><span>' + esc(c[0]) + '<span class="sub">' + esc(c[2]) + ' · ' + esc(c[1]) + '</span></span></div>'; }).join('');
+  $('accessAllow').hidden = n === CONNECTORS.length;
+}
+$('accessAllow').addEventListener('click', async function(){
+  if (!state.perms) return;
+  var m = await state.perms.request().catch(function(){ return null; });
+  renderAccess(m || undefined);
+});
+$('accessManage').addEventListener('click', async function(){
+  if (!state.perms) return;
+  try { await state.perms.manage(); $('accessMsg').textContent = ''; } catch (e) { $('accessMsg').textContent = 'The panel did not open. Use the Permissions item in this artifact\'s menu.'; }
+  renderAccess();
+});
+// latest US session close, with a margin for the daily bar to settle: 21:30 UTC on the most recent weekday
+function lastCloseMs(){
+  var d = new Date(), t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 21, 30);
+  if (t > d.getTime()) t -= 864e5;
+  while ([0, 6].indexOf(new Date(t).getUTCDay()) >= 0) t -= 864e5;
+  return t;
+}
+
+var STEPS = [
+  ['TD','Twelve Data · 8 stock and gold ETFs'],
+  ['CD','CoinDesk · BTC, ETH, SOL, LINK history'],
+  ['AV','Alpha Vantage · yields, CPI, Fed funds, BTC months'],
+  ['FR','Firecrawl · FRED 10-year TIPS yield'],
+  ['TQ','TEXT TO QUANT · crypto regime'],
+  ['CMC','CoinMarketCap · leverage and sentiment'],
+  ['CV','Coinversa Pulse · positioning, shown only'],
+  ['FC','Firecrawl · CME FedWatch odds'],
+  ['CALC','Formula · signals, limits, checks, status']
+];
+function setStep(k, st, msg){ var row = $('st-'+k); if (!row) return; row.querySelector('.dot').className = 'dot ' + st; row.querySelector('.msg').textContent = msg || ''; }
+function initSteps(){ $('steps').innerHTML = STEPS.map(function(s){ return '<div class="step" id="st-'+s[0]+'"><span class="dot"></span><span>'+esc(s[1])+'</span><span class="msg small muted num"></span></div>'; }).join(''); }
+
+async function fetchEquities(inp, cache, stale, srcNotes){
+  var got = 0, reused = 0, called = 0;
+  for (var i = 0; i < EQ.length; i++) {
+    var s = EQ[i]; setStep('TD','run', (i+1) + '/8 ' + s);
+    // a series saved after the latest market close cannot have changed: reuse it without a call
+    var savedAt = cache && cache.eqAt && cache.eqAt[s];
+    if (savedAt && cache.eq && cache.eq[s] && Date.parse(savedAt) >= lastCloseMs()) { inp.prices[s] = cache.eq[s].map(function(x){ return { d: x[0], c: x[1] }; }); state.meta[s] = { source: 'Twelve Data', at: savedAt }; reused++; continue; }
+    if (called++) await sleep(7600);
+    var ok = false;
+    for (var attempt = 0; attempt < 2 && !ok; attempt++) {
+      try { var ser = ZE.parse.twelve(await call(SRV.TD, 'get_time_series', { symbol: s, interval: '1day', outputsize: 260 })); if (ser && ser.length > 50) { inp.prices[s] = ser; ok = true; got++; state.meta[s] = { source: 'Twelve Data', at: new Date().toISOString() }; } else break; }
+      catch (e) { if (e && e.rateLimited && attempt === 0) { setStep('TD','run','waiting 60s for the rate limit'); await sleep(61000); } else { srcNotes.push('Twelve Data ' + s + ': ' + errText(e, SRV.TD) + '.'); break; } }
+    }
+    if (!ok && cache && cache.eq && cache.eq[s]) { inp.prices[s] = cache.eq[s].map(function(x){ return { d: x[0], c: x[1] }; }); stale.push(s); state.meta[s] = { source: 'Twelve Data, saved copy', at: cache.fetchedAt, fallback: true }; }
+  }
+  setStep('TD', got + reused === 8 ? 'ok' : got + reused ? 'stale' : 'fail', got + '/8 fresh' + (reused ? ', ' + reused + ' already current' : ''));
+  return got + reused;
+}
+// one retry after a short pause for a failed or empty read; access errors are not retried
+async function tryTwice(fn){
+  var r = null;
+  try { r = await fn(); } catch (e) { if (e && /^(needs_reauth|server_not_connected|not_in_manifest|approval_required|consent_required|blocked_by_policy)$/.test(e.code)) throw e; }
+  if (r && r.length) return r;
+  await sleep(1500 + Math.random() * 1000);
+  return await fn();
+}
+async function fetchCrypto(inp, cache, stale, srcNotes){
+  var got = 0, reused = 0;
+  async function one(s){
+    // prices saved in the last hour are reused without a call
+    var cAt = cache && cache.cxAt && cache.cxAt[s], cc = cache && cache.cx && cache.cx[s];
+    if (cAt && cc && cc.d && cc.l && Date.now() - Date.parse(cAt) < 3600e3) {
+      inp.prices[s] = cc.d.map(function(x){ return { d:x[0], c:x[1] }; }); inp.cryptoLong[s] = cc.l.map(function(x){ return { d:x[0], c:x[1] }; });
+      state.meta[s] = { source: (cache.cxSrc && cache.cxSrc[s]) || 'CoinDesk', at: cAt }; state.meta[s + '_l'] = { source: 'CoinDesk', at: cAt }; reused++; return;
+    }
+    var daily = null, long = null, dSrc = 'CoinDesk', at = function(){ return new Date().toISOString(); };
+    try { daily = await tryTwice(async function(){ return ZE.parse.coindesk(await call(SRV.CD, 'fetch_index_ohlcv', { market: 'ccix', instrument: s + '-USD', frequency: 'days', limit: 100 })); }); } catch(e){ srcNotes.push('CoinDesk ' + s + ' daily: ' + errText(e, SRV.CD) + '.'); }
+    if (!daily || daily.length < 30) { try { var dc = ZE.parse.cryptocom(await call(SRV.CC, 'get_candlestick', { instrument_name: s + '_USD', timeframe: '1D' })); if (dc && dc.length) { daily = dc; dSrc = 'Crypto.com'; srcNotes.push(s + ' daily prices came from Crypto.com.'); } } catch(e){} }
+    try { long = await tryTwice(async function(){ return ZE.parse.coindesk(await call(SRV.CD, 'fetch_index_ohlcv', { market: 'ccix', instrument: s + '-USD', frequency: 'days', aggregate: 3, limit: 100 })); }); } catch(e){ srcNotes.push('CoinDesk ' + s + ' trend: ' + errText(e, SRV.CD) + '.'); }
+    if (daily && daily.length) { inp.prices[s] = daily; state.meta[s] = { source: dSrc, at: at() }; } else if (cache && cache.cx && cache.cx[s] && cache.cx[s].d) { inp.prices[s] = cache.cx[s].d.map(function(x){ return { d:x[0], c:x[1] }; }); stale.push(s); state.meta[s] = { source: 'CoinDesk, saved copy', at: cache.fetchedAt, fallback: true }; }
+    if (long && long.length) { inp.cryptoLong[s] = long; state.meta[s + '_l'] = { source: 'CoinDesk', at: at() }; } else if (cache && cache.cx && cache.cx[s] && cache.cx[s].l) { inp.cryptoLong[s] = cache.cx[s].l.map(function(x){ return { d:x[0], c:x[1] }; }); if (stale.indexOf(s) < 0) stale.push(s); state.meta[s + '_l'] = { source: 'CoinDesk, saved copy', at: cache.fetchedAt, fallback: true }; }
+    if (daily && long) got++;
+  }
+  setStep('CD','run','');
+  await Promise.all([one('BTC'), one('ETH')]); await Promise.all([one('SOL'), one('LINK')]);
+  setStep('CD', got + reused === 4 ? 'ok' : got + reused ? 'stale' : 'fail', got + '/4 fresh' + (reused ? ', ' + reused + ' saved this hour' : ''));
+}
+async function fetchMacro(inp, srcNotes){
+  var cached = await getDoc('cache/macro');
+  var fresh = cached && cached.fetchedAt && (Date.now() - Date.parse(cached.fetchedAt)) < 12*3600*1000;
+  function useCache(){ inp.macro.tsy10 = cached.tsy10 || []; inp.macro.cpi = cached.cpi || []; inp.macro.ff = cached.ff || []; inp.btcMonthly = cached.btcMonthly || null; }
+  // a fresh cache is reused series by series; a series missing from it is fetched again instead of staying empty for 12 hours
+  var KEYS = ['tsy10','cpi','ff','btcMonthly'], need = KEYS.filter(function(k){ return !(fresh && cached[k] && cached[k].length); });
+  if (!need.length) { useCache(); KEYS.forEach(function(k){ state.meta[k] = { source: 'Alpha Vantage', at: cached.fetchedAt }; }); setStep('AV','ok','saved ' + when(cached.fetchedAt)); return; }
+  setStep('AV','run','');
+  var out = { tsy10: null, cpi: null, ff: null, btcMonthly: null }, fails = 0;
+  var jobs = [
+    ['tsy10', 'TREASURY_YIELD', { interval: 'weekly', maturity: '10year', datatype: 'json' }, ZE.parse.avSeries, 60],
+    ['cpi', 'CPI', { interval: 'monthly', datatype: 'json' }, ZE.parse.avSeries, 30],
+    ['ff', 'FEDERAL_FUNDS_RATE', { interval: 'monthly', datatype: 'json' }, ZE.parse.avSeries, 24],
+    ['btcMonthly', 'DIGITAL_CURRENCY_MONTHLY', { symbol: 'BTC', market: 'USD', datatype: 'csv' }, ZE.parse.avMonthly, 24]
+  ];
+  jobs = jobs.filter(function(j){ return need.indexOf(j[0]) >= 0; });
+  for (var i = 0; i < jobs.length; i++) {
+    var j = jobs[i]; if (i) await sleep(1600);
+    try { var v = await tryTwice(async function(){ return j[3](await call(SRV.AV, j[1], j[2])); }); if (v && v.length) { out[j[0]] = v.slice(-j[4]); state.meta[j[0]] = { source: 'Alpha Vantage', at: new Date().toISOString() }; } else fails++; }
+    catch (e) { fails++; srcNotes.push('Alpha Vantage ' + j[1] + ': ' + errText(e, SRV.AV) + '.'); }
+  }
+  KEYS.forEach(function(k){ if (!out[k] && cached && cached[k] && cached[k].length) { out[k] = cached[k]; state.meta[k] = need.indexOf(k) < 0 ? { source: 'Alpha Vantage', at: cached.fetchedAt } : { source: 'Alpha Vantage, saved copy', at: cached.fetchedAt, fallback: true }; } });
+  inp.macro.tsy10 = out.tsy10 || []; inp.macro.cpi = out.cpi || []; inp.macro.ff = out.ff || []; inp.btcMonthly = out.btcMonthly;
+  // a partial refetch keeps the cache's original time, so the series that were reused still expire on schedule
+  if (fails < jobs.length) { out.fetchedAt = need.length === KEYS.length ? new Date().toISOString() : cached.fetchedAt; await setDoc('cache/macro', out); }
+  var nOk = jobs.length - fails;
+  setStep('AV', fails === 0 ? 'ok' : nOk ? 'stale' : (cached ? 'stale' : 'fail'), nOk + '/' + jobs.length + ' fresh' + (KEYS.length > jobs.length ? ', ' + (KEYS.length - jobs.length) + ' saved' : ''));
+}
+async function fetchReal(inp, srcNotes){
+  var cached = await getDoc('cache/real');
+  if (cached && cached.rows && cached.fetchedAt && (Date.now() - Date.parse(cached.fetchedAt)) < 12*3600*1000) { inp.macro.real = cached.rows.map(function(x){ return { d: x[0], v: x[1] }; }); state.meta.real = { source: 'FRED DFII10 via Firecrawl', at: cached.fetchedAt }; setStep('FR','ok','saved ' + when(cached.fetchedAt)); return; }
+  setStep('FR','run','');
+  var from = new Date(Date.now() - 200*864e5).toISOString().slice(0,10);
+  try {
+    var rows = ZE.parse.fred(await call(SRV.FC, 'firecrawl_scrape', { url: 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFII10&cosd=' + from, formats: ['markdown'], maxAge: 43200000 }));
+    if (!rows || rows.length < 40) throw { code: 'tool_error', message: 'series too short' };
+    inp.macro.real = rows; state.meta.real = { source: 'FRED DFII10 via Firecrawl', at: new Date().toISOString() }; await setDoc('cache/real', { fetchedAt: new Date().toISOString(), rows: rows.map(function(x){ return [x.d, x.v]; }) });
+    setStep('FR','ok', rows[rows.length-1].v.toFixed(2) + '% on ' + rows[rows.length-1].d.slice(5));
+  } catch (e) {
+    if (cached && cached.rows) { inp.macro.real = cached.rows.map(function(x){ return { d: x[0], v: x[1] }; }); state.meta.real = { source: 'FRED DFII10, saved copy', at: cached.fetchedAt, fallback: true }; setStep('FR','stale','saved ' + when(cached.fetchedAt)); }
+    else setStep('FR','fail', errText(e, SRV.FC));
+    srcNotes.push('FRED real yield via Firecrawl: ' + errText(e, SRV.FC) + (cached ? '. Used the saved series.' : '. Gold used the 10y minus CPI proxy.'));
+  }
+}
+async function fetchSentiment(inp, srcNotes){
+  setStep('TQ','run',''); setStep('CMC','run',''); setStep('CV','run',''); setStep('FC','run','');
+  await Promise.all([
+    fetchReal(inp, srcNotes),
+    call(SRV.TQ, 'market_regime', {}).then(function(p){ inp.regime = p; state.meta.regime = { source: 'TEXT TO QUANT RSPS', at: new Date().toISOString() }; setStep('TQ','ok', 'fresh'); }).catch(function(e){ setStep('TQ','fail', errText(e, SRV.TQ)); srcNotes.push('TEXT TO QUANT: ' + errText(e, SRV.TQ) + '.'); }),
+    call(SRV.CMC, 'get_global_metrics_latest', {}).then(function(p){ inp.global = typeof p === 'string' ? JSON.parse(p) : p; state.meta.oi = state.meta.fg = { source: 'CoinMarketCap', at: new Date().toISOString() }; setStep('CMC','ok','fresh'); }).catch(function(e){ setStep('CMC','fail', errText(e, SRV.CMC)); srcNotes.push('CoinMarketCap: ' + errText(e, SRV.CMC) + '.'); }),
+    call(SRV.FC, 'firecrawl_scrape', { url: 'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html', formats: ['json'], waitFor: 8000, maxAge: 3600000, jsonOptions: { prompt: 'From the FedWatch tool, extract the next FOMC meeting date and the probability (percent) of each outcome for that meeting: hike, hold, cut.', schema: { type: 'object', properties: { meetings: { type: 'array', items: { type: 'object', properties: { date: { type: 'string' }, hike: { type: 'number' }, hold: { type: 'number' }, cut: { type: 'number' } } } } } } } }).then(function(p){ var fo = ZE.fedWatchOdds(p, inp.now.slice(0,10)); if (!fo) throw { code: 'tool_error', message: 'odds not found on page' }; inp.fedwatch = p; state.meta.fed = { source: 'CME FedWatch via Firecrawl', at: new Date().toISOString() }; setStep('FC','ok', 'hike ' + Math.round(fo.meetings[0].hike*100) + '%'); }).catch(function(e){ setStep('FC','fail', errText(e, SRV.FC)); srcNotes.push('Firecrawl FedWatch: ' + errText(e, SRV.FC) + '. Fed input fell back to the 6-month Fed funds change.'); }),
+    call(SRV.CV, 'live_cohort_bias', { coin: 'BTC', useToonFormat: false, maxResponseTokens: 3000 }).then(function(p){ inp.bias = typeof p === 'string' ? JSON.parse(p) : p; state.meta.cv = { source: 'Coinversa Pulse', at: new Date().toISOString() }; setStep('CV','ok','fresh'); }).catch(function(e){ setStep('CV','fail', errText(e, SRV.CV)); srcNotes.push('Coinversa Pulse: ' + errText(e, SRV.CV) + ' (shown only, so the weights are unaffected).'); })
+  ]);
+}
+
+/* ---------- input records: source, units, observation date, retrieval time ---------- */
+function lastObs(ser){ return ser && ser.length ? String(ser[ser.length-1].d).slice(0,10) : null; }
+function monthEndISO(m){ return new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7), 0)).toISOString().slice(0,10); }
+function buildEvidence(inp){
+  var M = state.meta || {}, now = inp.now, out = [];
+  function add(r){ var mm = M[r.id] || {}; r.source = mm.source || r.source; r.retrievedAt = mm.at || null; r.fallback = !!mm.fallback; out.push(r); }
+  EQ.forEach(function(s){ var ser = inp.prices[s]; add({ id: s, asset: s, label: s + ' daily closes', role: 'critical', source: 'Twelve Data', units: 'USD close', have: !!(ser && ser.length), observedAt: lastObs(ser), maxAgeDays: 4, hardAgeDays: 7 }); });
+  CX.forEach(function(s){ var d = inp.prices[s], l = inp.cryptoLong[s];
+    add({ id: s, asset: s, label: s + ' daily closes', role: 'critical', source: 'CoinDesk', units: 'USD, 00:00 UTC bars', have: !!(d && d.length), observedAt: lastObs(d), maxAgeDays: 2, hardAgeDays: 5 });
+    add({ id: s + '_l', asset: s, label: s + ' 3-day bars', role: 'critical', source: 'CoinDesk', units: 'USD, trend bars', have: !!(l && l.length), observedAt: lastObs(l), maxAgeDays: 4, hardAgeDays: 9 });
+  });
+  var bm = inp.btcMonthly ? ZE.monthEndCloses(inp.btcMonthly, now.slice(0,10)) : [], lm = bm.length ? bm[bm.length-1].m : null;
+  var pd = new Date(now); pd.setUTCDate(1); pd.setUTCMonth(pd.getUTCMonth() - 1); var pm = pd.toISOString().slice(0,7);
+  add({ id: 'btcMonthly', label: 'BTC month-end closes', role: 'critical', source: 'Alpha Vantage', units: 'USD, monthly close', have: bm.length >= ZE.PARAMS.gateMonths, observedAt: lm ? monthEndISO(lm) : null, tooOld: !!lm && lm < pm, note: lm ? 'latest completed month ' + lm + (lm < pm ? '; ' + pm + ' is missing' : '') : null });
+  var m = inp.macro || {};
+  add({ id: 'tsy10', label: '10-year Treasury yield', role: 'optional', source: 'Alpha Vantage', units: 'percent, weekly', have: !!(m.tsy10 && m.tsy10.length), observedAt: lastObs(m.tsy10), maxAgeDays: 14 });
+  add({ id: 'cpi', label: 'CPI', role: 'optional', source: 'Alpha Vantage', units: 'index, monthly', have: !!(m.cpi && m.cpi.length), observedAt: lastObs(m.cpi), maxAgeDays: 75 });
+  add({ id: 'ff', label: 'Fed funds rate', role: 'optional', source: 'Alpha Vantage', units: 'percent, monthly average', have: !!(m.ff && m.ff.length), observedAt: lastObs(m.ff), maxAgeDays: 62 });
+  add({ id: 'real', label: 'Real yield', role: 'optional', source: 'FRED DFII10 via Firecrawl', units: 'percent, daily', have: !!(m.real && m.real.length >= 40), observedAt: lastObs(m.real), maxAgeDays: 6 });
+  add({ id: 'fed', label: 'Fed odds, next meeting', role: 'optional', source: 'CME FedWatch via Firecrawl', units: 'probability', have: !!inp.fedwatch, observedAt: null, note: inp.fedwatch ? 'page extraction, not an official feed' : null });
+  add({ id: 'regime', label: 'Crypto regime', role: 'optional', source: 'TEXT TO QUANT RSPS', units: 'RUN, REVIEW or SKIP', have: !!inp.regime, observedAt: null, note: 'proprietary score' });
+  add({ id: 'oi', label: 'Crypto leverage', role: 'optional', source: 'CoinMarketCap', units: '30-day change, open interest vs market cap', have: !!inp.global, observedAt: null });
+  add({ id: 'fg', label: 'Fear & Greed', role: 'shown', source: 'CoinMarketCap', units: 'index 0 to 100', have: !!inp.global, observedAt: null });
+  add({ id: 'cv', label: 'Hyperliquid positioning', role: 'shown', source: 'Coinversa Pulse', units: 'net bias by trader tier', have: !!inp.bias, observedAt: null, note: 'one venue' });
+  return out;
+}
+
+async function refresh(){
+  if (state.running) return;
+  state.running = true;
+  var btn = $('refreshBtn'); btn.disabled = true; $('refreshIcon').className = 'spin'; $('refreshIcon').textContent = ''; $('refreshLabel').textContent = 'Running';
+  showTab('lage'); $('progressCard').hidden = false; initSteps();
+  var t0 = Date.now(), timer = setInterval(function(){ $('progressTimer').textContent = Math.round((Date.now()-t0)/1000) + 's'; }, 1000);
+  try {
+    state.mcp = state.mcp || await useCap('mcp');
+    if (!state.mcp) { $('statusLine').textContent = 'Connectors are not available in this view. Open the app in claude.ai while signed in.'; STEPS.forEach(function(s){ setStep(s[0],'fail','unavailable'); }); return; }
+    // one batched dialog for every connector the app reads, instead of a separate prompt as each connector is first called
+    state.perms = state.perms || await useCap('permissions');
+    if (state.perms) { var granted = await state.perms.request().catch(function(){ return null; }); renderAccess(granted || undefined); }
+    var inp = { now: new Date().toISOString(), prices: {}, cryptoLong: {}, macro: {} }, stale = [], srcNotes = [];
+    state.meta = {}; state.consent = [];
+    var pxCache = await getDoc('cache/px');
+    var pol = await getDoc('settings/policy'); if (pol) state.policy = pol;
+    var hd = await getDoc('settings/holdings'); state.holdings = hd && hd.units && (Object.keys(hd.units).length || hd.cash) ? hd : null;
+    await Promise.all([
+      fetchEquities(inp, pxCache, stale, srcNotes),
+      (async function(){ await fetchCrypto(inp, pxCache, stale, srcNotes); await fetchMacro(inp, srcNotes); await fetchSentiment(inp, srcNotes); })()
+    ]);
+    setStep('CALC','run','');
+    inp.policy = { ddOverlay: !!state.policy.ddOverlay, altGate: !!state.policy.altGate, gradedGate: !!state.policy.gradedGate };
+    if (state.holdings) inp.holdings = state.holdings;
+    // previous runs, valid ones only: action reference = latest valid run; smoothing reference = latest valid run 3 to 21 days old
+    var now = Date.now(), vr = validRuns(), ref = vr[0] || null, prev = null;
+    for (var i = 0; i < vr.length; i++) { var age = (now - Date.parse(vr[i].asOf)) / 864e5; if (age >= 3 && age <= 21) { prev = vr[i]; break; } }
+    inp.evidence = buildEvidence(inp);
+    var res = ZE.compute(inp, prev, ref);
+    if (state.consent.length) srcNotes.push(state.consent.join(', ') + ' asked for approval and did not get it. Holdings → Connector access allows every connector at once.');
+    res.stale = stale; res.sourceNotes = srcNotes; res.refLabel = ref ? 'vs run of ' + when(ref.asOf) : 'vs base plan';
+    setStep('CALC', res.status === 'invalid' ? 'fail' : res.status === 'degraded' ? 'stale' : 'ok', res.status === 'invalid' ? 'blocked: ' + res.blockers.length + ' issue' + (res.blockers.length > 1 ? 's' : '') : res.status === 'degraded' ? 'degraded, still actionable' : 'inputs and limits pass');
+    // save price cache (fresh series only) and the run
+    var px = { fetchedAt: inp.now, eq: {}, cx: {} };
+    EQ.forEach(function(s){ if (inp.prices[s] && stale.indexOf(s) < 0) px.eq[s] = inp.prices[s].map(function(x){ return [x.d, x.c]; }); else if (pxCache && pxCache.eq && pxCache.eq[s]) px.eq[s] = pxCache.eq[s]; });
+    CX.forEach(function(s){ px.cx[s] = { d: inp.prices[s] ? inp.prices[s].map(function(x){ return [x.d, x.c]; }) : null, l: inp.cryptoLong[s] ? inp.cryptoLong[s].map(function(x){ return [x.d, x.c]; }) : null }; });
+    // per-series fetch times decide what the next refresh can reuse; a fallback copy keeps its old time, so it is fetched again
+    px.eqAt = {}; px.cxAt = {}; px.cxSrc = {};
+    EQ.forEach(function(s){ var mm = state.meta[s], t = mm && !mm.fallback ? mm.at : pxCache && pxCache.eqAt && pxCache.eqAt[s]; if (t) px.eqAt[s] = t; });
+    CX.forEach(function(s){ var a = state.meta[s], b = state.meta[s + '_l']; if (a && b && !a.fallback && !b.fallback) { px.cxAt[s] = a.at < b.at ? a.at : b.at; px.cxSrc[s] = a.source; } });
+    if (state.db) await setDoc('cache/px', px);
+    loadLastPx(px);
+    var id = 'r' + inp.now.replace(/[:.]/g, '-');
+    var saved = state.db ? await setDoc('runs/' + id, res) : false;
+    res.savedNote = saved === true ? 'saved' : 'not saved';
+    if (saved !== true) res.notes = (res.notes || []).concat(['This run could not be saved' + (saved ? ' (' + saved + ')' : ': storage is unavailable in this view') + '.']);
+    renderLatest(res);
+    if (saved !== true) renderHistory();
+  } catch (e) {
+    $('statusLine').textContent = 'Refresh stopped: ' + (e && e.message ? e.message : 'unexpected error');
+  } finally {
+    clearInterval(timer); state.running = false; btn.disabled = false; $('refreshIcon').className = ''; $('refreshIcon').textContent = '↻'; $('refreshLabel').textContent = 'Refresh';
+    setTimeout(function(){ $('progressCard').hidden = true; }, 6000);
+  }
+}
+$('refreshBtn').addEventListener('click', refresh);
+function loadLastPx(px){ if (!px) return; EQ.forEach(function(s){ var a = px.eq && px.eq[s]; if (a && a.length) state.lastPx[s] = a[a.length-1][1]; }); CX.forEach(function(s){ var c = px.cx && px.cx[s], a = c && (c.d || c.l); if (a && a.length) state.lastPx[s] = a[a.length-1][1]; }); holdPreview(); }
+
+/* ---------- Claude briefing ---------- */
+var briefing = false;
+$('explainBtn').addEventListener('click', async function(){
+  var run = state.current; var box = $('briefBox');
+  if (!run || run.base) { box.textContent = 'Run a refresh first, then ask for the briefing.'; return; }
+  if (briefing) return; briefing = true; this.disabled = true; box.classList.remove('muted'); box.textContent = 'Thinking…';
+  try {
+    var sample = await useCap('sample');
+    if (!sample) { box.textContent = 'Claude briefings are not available in this view.'; return; }
+    var summary = { status: statusOf(run), degradedInputs: run.degraded || [], inputsNotObserved: (run.evidence || []).filter(function(r){ return r.quality !== 'observed'; }).map(function(r){ return r.label + ': ' + r.quality; }), blockedLaterRefresh: state.blocked ? { asOf: state.blocked.asOf, blockers: state.blocked.blockers } : null, asOf: run.asOf, engine: run.engine, posture: run.posture, policy: run.policy, weights: run.weights, base: ZE.ASSETS.reduce(function(o,a){ o[a.s]=a.base; return o; }, {}), cashToInterestAccounts: run.outside, cashReasons: run.outsideBy, sleeves: run.sleeves, actionBasis: run.actionBasis, actions: run.actions, holdingsTotal: run.holdings ? run.holdings.total : null, gates: run.gates, macro: run.macro, checksOk: run.checksOk, relaxedLimits: run.relaxed,
+      risk: { vol: run.risk.vol, volEwma: run.risk.volEwma, volStress: run.risk.volStress, cryptoShare: run.risk.cryptoShare, cryptoCap: run.risk.cryptoCap, nvdaLook: run.risk.nvdaLook, stress: run.risk.stress, drawdown: run.risk.dd },
+      noMacroShadow: run.shadows && run.shadows.core ? run.shadows.core.sleeves : null, riskParityShadows: run.shadows ? { equalRisk: run.shadows.erc.sleeves, clusterParity: run.shadows.crp.sleeves } : null, notes: run.notes, events: run.events, missing: run.missing,
+      signals: Object.keys(run.signals||{}).reduce(function(o,k){ var s = run.signals[k]; o[k] = { trend: s.T, momentum: s.M, score: s.z }; return o; }, {}) };
+    var prompt = 'You write the weekly briefing for "Zobiris Lagebild" v3, a rules-based allocation engine for a medium plus risk portfolio of stocks, gold and crypto (fully invested; bonds held elsewhere; cash goes to interest accounts). A weekly replay from 2021 to 2026 found that the monthly BTC gate did most of the drawdown protection and that macro at 20% weight had no measurable effect. Using only the JSON below, start with one line on data status: if blockedLaterRefresh is set, say the latest refresh was blocked and why, and that every figure below is the historical run of its asOf date with no trades to make; if status is degraded, name the inputs that were missing or proxies. Keep observed data, model outputs and your interpretation clearly apart, and use no number that is not in the JSON. Then write 5 short bullet points in plain English: 1) the posture and why, 2) the biggest weight changes and the signals behind them, 3) the BTC gate and any limit that moved money to cash, 4) the main risk to watch, including correlation stress and stress volatility, 5) one concrete thing to do this week (when a refresh was blocked, that is fixing the blocker and refreshing again, not trading)' + (run.actionBasis === 'holdings' ? ', in dollars, from the actions against the saved holdings' : '') + '. Use complete sentences, no hyphens or dashes to separate thoughts, no hype, cite the actual numbers, and end with one line saying this is research, not financial advice.\n\n' + JSON.stringify(summary);
+    var out = await sample(prompt, { onText: function(u){ box.textContent = u.text; }, cache: false });
+    box.textContent = out.text;
+  } catch (e) {
+    box.textContent = e && e.code === 'rate_limited' ? 'Claude is rate limited right now. Try again in a few minutes.' : e && e.code === 'not_granted' ? 'Claude briefings were not allowed for this page.' : 'The briefing did not complete. ' + (e && e.text ? e.text : '');
+  } finally { briefing = false; $('explainBtn').disabled = false; }
+});
+
+/* ---------- boot ---------- */
+renderRun(baseRun());
+policyFill({});
+(async function(){ state.perms = await useCap('permissions'); renderAccess(); })();
+(async function(){
+  state.db = await useCap('db');
+  if (!state.db) { $('statusLine').textContent = 'Base plan · runs are not saved in this view'; return; }
+  runsSub();
+  var pol = await getDoc('settings/policy'); if (pol) { state.policy = pol; policyFill(pol); }
+  loadLastPx(await getDoc('cache/px'));
+  var hd = await getDoc('settings/holdings');
+  if (hd && hd.units && (Object.keys(hd.units).length || hd.cash)) { state.holdings = hd; holdFill(hd); $('holdStamp').textContent = 'saved ' + when(hd.asOf); }
+})();
+})();
+</script>
+
+</body></html>

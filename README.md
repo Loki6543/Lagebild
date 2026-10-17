@@ -63,3 +63,8 @@ of provider terms; `data/MANIFEST.json` lists their SHA-256 hashes.
   the absolute returns are not a forecast.
 - One market history: the configurations correlate at 0.98 week to week, so 22 trials are worth about
   1.4 independent ones.
+
+## App and written method
+
+- `app/index.html`: the Lagebild app (v3.1) as published on claude.ai. It reads market data through claude.ai connectors (`window.claude`), so it runs as a claude.ai artifact, not as a standalone page.
+- `docs/lagebild-v3.1.md`: the app's Formula and Plan tabs as Markdown: the 12-step formula, the risk model, what the review and technical whitepaper changed, the 2021–2026 replay table, data sources, the free-data path, and the base plan and standing rules.

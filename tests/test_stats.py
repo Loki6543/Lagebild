@@ -43,6 +43,20 @@ def test_pbo_is_near_half_for_pure_noise():
     assert 0.3 < pbo < 0.7
 
 
+def test_regime_active_performance_splits_and_takes_the_minimum():
+    rng = np.random.default_rng(6)
+    a = rng.normal(0.001, 0.01, 200)
+    mask = np.zeros(200, bool); mask[:40] = True
+    a[:40] -= 0.01                                        # loses inside the regime
+    r = S.regime_active_performance({'x': a}, {'stress': mask})['x']
+    st, ns = r['regimes']['stress'], r['regimes']['not_stress']
+    assert st['weeks'] == 40 and ns['weeks'] == 160
+    assert abs(st['ann_active'] - a[:40].mean() * 52) < 1e-12
+    assert r['mrp_regime'] == 'stress' and r['mrp'] == st['active_sharpe'] < 0 < ns['active_sharpe']
+    tiny = np.zeros(200, bool); tiny[:5] = True
+    assert S.regime_active_performance({'x': a}, {'t': tiny})['x']['regimes']['t'] is None
+
+
 def test_cvar_matches_tail_mean_and_normal_case():
     x = np.arange(1, 101) / -100.0                       # losses 1% .. 100%
     assert abs(S.cvar(x, 0.95) - np.mean(np.arange(96, 101) / 100)) < 1e-12

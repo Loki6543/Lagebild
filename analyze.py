@@ -14,13 +14,14 @@ import numpy as np
 import stats as S
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RUNS = os.path.join(HERE, 'results', 'runs')
+RES = os.environ.get('LAGEBILD_RESULTS') or os.path.join(HERE, 'results')   # same override as run_replay.js
+RUNS = os.path.join(RES, 'runs')
 RISK_AVERSION = 1.5           # CE = annual mean excess return - 1.5 x annual variance
 KEY = ['base', 'base_gate10', 'v3', 'v3_dd', 'v3_nocaps', 'v3_nogate']
 
 
 def load():
-    order = json.load(open(os.path.join(HERE, 'results', 'configs.json')))['configs']
+    order = json.load(open(os.path.join(RES, 'configs.json')))['configs']
     runs = {}
     for c in order:
         f = os.path.join(RUNS, c['id'] + '.json')
@@ -116,6 +117,17 @@ def main():
 
     pbo, logits = S.pbo_cscv(M, n_blocks=16)
     regime = S.trial_correlation_by_regime(M, ex['base'])
+    # regimes known at the start of each week: the base plan 10% or more below its running peak, and the monthly
+    # BTC gate closed (read from the base + gate run); active returns are measured inside each
+    nav = np.array([w[1] for w in runs['base']['weekly']], float)
+    dd = 1 - nav[:-1] / np.maximum.accumulate(nav)[:-1]
+    reg_masks = {'base_drawdown': dd >= 0.10}
+    gw = runs['base_gate10'].get('weights') or []
+    if len(gw) == len(nav):
+        reg_masks['btc_gate_off'] = np.array([w[6] is False for w in gw[:-1]])
+    regime_perf = S.regime_active_performance(active, reg_masks)
+    for k, v in regime_perf.items():
+        res[k]['regime_active'] = v
     # a simple walk-forward reading: pick the best CE in the first half, see where it lands in the second
     half = len(M) // 2
     first = {k: ce(ex[k][:half]) for k in ids}
@@ -130,13 +142,14 @@ def main():
         'weeks': int(len(M)), 'trials': n, 'avg_trial_correlation': rho, 'effective_trials': n_eff,
         'sr_star_weekly': sr_star, 'pbo': pbo, 'pbo_logit_median': float(np.median(logits)),
         'trial_correlation_by_regime': regime,
+        'regime_weeks': {k: int(v.sum()) for k, v in reg_masks.items()},
         'walk_forward': {'split': split, 'first_half_best': pick, 'its_second_half_rank': rank2, 'of': n},
         'configs': {k: dict(label=runs[k]['label'], **res[k]) for k in ids},
     }
-    with open(os.path.join(HERE, 'results', 'summary.json'), 'w') as fh:
+    with open(os.path.join(RES, 'summary.json'), 'w') as fh:
         json.dump(summary, fh, indent=1)
     write_report(summary, ids)
-    print(open(os.path.join(HERE, 'results', 'REPORT.md')).read())
+    print(open(os.path.join(RES, 'REPORT.md')).read())
 
 
 def pct(x, d=1):
@@ -185,6 +198,26 @@ def write_report(s, ids):
     wf = s['walk_forward']
     L.append('- Walk forward: the best configuration before %s was **%s**; after that date it ranked %d of %d.' % (wf['split'], c[wf['first_half_best']]['label'], wf['its_second_half_rank'], wf['of']))
     L.append('')
+    rw = s.get('regime_weeks') or {}
+    if rw:
+        names = list(rw)
+        L.append('## Inside regimes')
+        L.append('')
+        L.append('Active return over the base plan, annualised, inside regimes known at the start of each week: ' + '; '.join('%s %d weeks' % (n.replace('_', ' '), rw[n]) for n in names) + '. Minimum regime Sharpe is the lowest active Sharpe ratio across these regimes and their complements.')
+        L.append('')
+        L.append('| Configuration | ' + ' | '.join('%s | not %s' % (n.replace('_', ' '), n.replace('_', ' ')) for n in names) + ' | Minimum regime Sharpe |')
+        L.append('|---|' + '---:|---:|' * len(names) + '---:|')
+        rows = [k for k in c if c[k].get('regime_active')]
+        rows.sort(key=lambda k: -(c[k]['regime_active']['mrp'] if c[k]['regime_active']['mrp'] is not None else -9))
+        for k in rows:
+            ra = c[k]['regime_active']
+            cell = lambda x: '' if not x else pct(x['ann_active'])
+            vals = []
+            for n in names:
+                vals += [cell(ra['regimes'].get(n)), cell(ra['regimes'].get('not_' + n))]
+            m = ra['mrp']
+            L.append('| %s | %s | %s |' % (c[k]['label'], ' | '.join(vals), ('%.2f (%s)' % (m, ra['mrp_regime'].replace('_', ' '))) if m is not None else ''))
+        L.append('')
     L.append('## Calendar years')
     L.append('')
     years = sorted(c['base']['years'])
@@ -195,7 +228,7 @@ def write_report(s, ids):
             L.append('| %s | ' % c[k]['label'] + ' | '.join(pct(c[k]['years'][y], 0) for y in years) + ' |')
     L.append('')
     L.append('2021 starts on %s; 2026 ends on %s.' % (s['start'], s['end']))
-    with open(os.path.join(HERE, 'results', 'REPORT.md'), 'w') as fh:
+    with open(os.path.join(RES, 'REPORT.md'), 'w') as fh:
         fh.write('\n'.join(L) + '\n')
 
 

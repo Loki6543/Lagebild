@@ -87,6 +87,35 @@ def trial_correlation_by_regime(returns_matrix, proxy, stress_quantile=0.10, min
     return out
 
 
+def regime_active_performance(active, regimes, min_rows=10, periods=52):
+    """Active return (configuration minus base plan) inside each regime, and the minimum regime performance.
+
+    active maps a configuration to its weekly active returns; regimes maps a regime name to a boolean mask over
+    the same weeks, built only from information known at the start of each week. Measuring active returns inside
+    independently defined regimes avoids the trap of judging configurations that all track the base plan on the
+    base plan's own worst weeks. A regime with fewer than min_rows weeks gets None rather than an estimate.
+    The minimum regime performance is the lowest annualised active Sharpe ratio across the regimes and their
+    complements (Alexander and Fabozzi's MRP idea, applied to active returns)."""
+    out = {}
+    for k, a in active.items():
+        a = np.asarray(a, float)
+        cells, worst = {}, None
+        for name, mask in regimes.items():
+            mask = np.asarray(mask, bool)
+            for tag, mk in ((name, mask), ('not_' + name, ~mask)):
+                x = a[mk]
+                if x.size < min_rows:
+                    cells[tag] = None
+                    continue
+                sd = x.std(ddof=1)
+                sr = float(x.mean() / sd * math.sqrt(periods)) if sd > 0 else None
+                cells[tag] = {'weeks': int(x.size), 'ann_active': float(x.mean() * periods), 'active_sharpe': sr}
+                if sr is not None and (worst is None or sr < worst[1]):
+                    worst = (tag, sr)
+        out[k] = {'regimes': cells, 'mrp': worst[1] if worst else None, 'mrp_regime': worst[0] if worst else None}
+    return out
+
+
 def pbo_cscv(returns_matrix, n_blocks=16, metric=sharpe):
     """Probability that the in-sample best configuration ranks below the out-of-sample median."""
     m = np.asarray(returns_matrix, float)

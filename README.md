@@ -68,3 +68,9 @@ of provider terms; `data/MANIFEST.json` lists their SHA-256 hashes.
 
 - `app/index.html`: the Lagebild app (v3.1) as published on claude.ai. It reads market data through claude.ai connectors (`window.claude`), so it runs as a claude.ai artifact, not as a standalone page.
 - `docs/lagebild-v3.1.md`: the app's Formula and Plan tabs as Markdown: the 12-step formula, the risk model, what the review and technical whitepaper changed, the 2021–2026 replay table, data sources, the free-data path, and the base plan and standing rules.
+
+## Verification and review
+
+- `verification/crypto_cap_proof.py`: the whitepaper's proof that the crypto risk-cap root never leaves crypto above its share of risk (10,000 random portfolios, two covariance models each).
+- `verification/engine_crypto_cap_check.js`: the same test run against the shipped engine's own functions. Both report 0 failures.
+- `docs/whitepaper-v2-review.md`: the v2 whitepaper and research memo checked against this code. It lists what the engine already specifies, what is still open, and where v2 is wrong. Read it before adopting any v2 placeholder.

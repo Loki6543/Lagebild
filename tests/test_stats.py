@@ -43,6 +43,21 @@ def test_pbo_is_near_half_for_pure_noise():
     assert 0.3 < pbo < 0.7
 
 
+def test_regime_correlation_sees_crash_convergence():
+    rng = np.random.default_rng(4)
+    t, n = 400, 6
+    market = rng.normal(0.002, 0.02, t)
+    crash = market <= np.quantile(market, 0.10)
+    noise = rng.normal(0, 0.02, (t, n))
+    noise[crash] *= 0.1                                    # trials converge in the worst weeks
+    m = market[:, None] + noise
+    r = S.trial_correlation_by_regime(m, market)
+    assert r['stress_weeks'] == 40 and r['calm_weeks'] == 360
+    assert r['stress_rho'] > r['calm_rho']
+    assert r['stress_n_eff'] < r['calm_n_eff']
+    assert S.trial_correlation_by_regime(m[:20], market[:20])['stress_rho'] is None
+
+
 def test_pbo_refuses_too_few_rows():
     m = np.random.default_rng(3).normal(0, 0.01, (12, 5))
     try:

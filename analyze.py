@@ -114,6 +114,7 @@ def main():
             res[k]['dsr_active'], act_star = S.deflated_sharpe(active[k], act_srs, n - 1)
 
     pbo, logits = S.pbo_cscv(M, n_blocks=16)
+    regime = S.trial_correlation_by_regime(M, ex['base'])
     # a simple walk-forward reading: pick the best CE in the first half, see where it lands in the second
     half = len(M) // 2
     first = {k: ce(ex[k][:half]) for k in ids}
@@ -127,6 +128,7 @@ def main():
         'engine': runs['v3']['engine'], 'start': runs['v3']['start'], 'end': runs['v3']['end'],
         'weeks': int(len(M)), 'trials': n, 'avg_trial_correlation': rho, 'effective_trials': n_eff,
         'sr_star_weekly': sr_star, 'pbo': pbo, 'pbo_logit_median': float(np.median(logits)),
+        'trial_correlation_by_regime': regime,
         'walk_forward': {'split': split, 'first_half_best': pick, 'its_second_half_rank': rank2, 'of': n},
         'configs': {k: dict(label=runs[k]['label'], **res[k]) for k in ids},
     }
@@ -176,6 +178,9 @@ def write_report(s, ids):
     L.append('')
     L.append('- Probability of backtest overfitting (CSCV, 16 blocks, 12,870 splits): **%s**. Above 50%% means the in-sample winner usually lands in the bottom half out of sample.' % pct(s['pbo'], 0))
     L.append('- The configurations move together (average weekly correlation %.2f), so the %d trials count as about %.1f independent ones.' % (s['avg_trial_correlation'], s['trials'], s['effective_trials']))
+    rg = s.get('trial_correlation_by_regime') or {}
+    if rg.get('stress_rho') is not None and rg.get('calm_rho') is not None:
+        L.append('- In the worst 10%% of base-plan weeks (%d) the configurations correlate at %.2f (about %.1f independent trials); in the other %d weeks at %.2f (%.1f).' % (rg['stress_weeks'], rg['stress_rho'], rg['stress_n_eff'], rg['calm_weeks'], rg['calm_rho'], rg['calm_n_eff']))
     wf = s['walk_forward']
     L.append('- Walk forward: the best configuration before %s was **%s**; after that date it ranked %d of %d.' % (wf['split'], c[wf['first_half_best']]['label'], wf['its_second_half_rank'], wf['of']))
     L.append('')

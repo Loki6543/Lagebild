@@ -56,6 +56,23 @@ def deflated_sharpe(x, trial_srs, n_trials):
     return psr(x, sr_star), sr_star
 
 
+def trial_correlation_by_regime(returns_matrix, proxy, stress_quantile=0.10, min_rows=10):
+    """Average pairwise trial correlation in stress weeks (proxy at or below its stress_quantile) and in the rest.
+
+    Returns None for a regime with fewer than min_rows weeks rather than assuming a value."""
+    m = np.asarray(returns_matrix, float)
+    p = np.asarray(proxy, float)
+    stress = p <= np.quantile(p, stress_quantile)
+    out = {'stress_weeks': int(stress.sum()), 'calm_weeks': int((~stress).sum())}
+    for name, mask in (('stress', stress), ('calm', ~stress)):
+        if mask.sum() < min_rows or m.shape[1] < 2:
+            out[name + '_rho'], out[name + '_n_eff'] = None, None
+        else:
+            n_eff, rho = effective_trials(m[mask])
+            out[name + '_rho'], out[name + '_n_eff'] = rho, n_eff
+    return out
+
+
 def pbo_cscv(returns_matrix, n_blocks=16, metric=sharpe):
     """Probability that the in-sample best configuration ranks below the out-of-sample median."""
     m = np.asarray(returns_matrix, float)

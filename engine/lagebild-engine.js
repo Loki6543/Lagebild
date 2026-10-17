@@ -1,4 +1,4 @@
-/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792234424-a7f4).
+/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792236328-4a9f).
    Do not edit here: change the app, then copy the engine again so the replay always tests the shipped code. */
 /* Zobiris Lagebild allocation engine v3.0
    v3 answers the October 16 formula review: volatility-scaled log signals, reduced macro authority,
@@ -14,21 +14,21 @@
 
   var VERSION = 'Zobiris Lagebild v3.1';
   var ASSETS = [
-    { s: 'VOO',  sleeve: 'stocks', base: 26, kind: 'eq', name: 'S&P 500 core' },
+    { s: 'VOO',  sleeve: 'stocks', base: 28, kind: 'eq', name: 'S&P 500 core' },
     { s: 'SMH',  sleeve: 'stocks', base: 12, kind: 'eq', name: 'Semiconductors' },
     { s: 'NVDA', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'NVIDIA' },
-    { s: 'MSFT', sleeve: 'stocks', base: 4,  kind: 'eq', name: 'Microsoft' },
+    { s: 'MSFT', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Microsoft' },
     { s: 'TSM',  sleeve: 'stocks', base: 4,  kind: 'eq', name: 'TSMC' },
-    { s: 'XLE',  sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Energy hedge' },
-    { s: 'IAUM', sleeve: 'gold',   base: 16, kind: 'eq', name: 'Physical gold' },
-    { s: 'GDX',  sleeve: 'gold',   base: 8,  kind: 'eq', name: 'Gold miners' },
-    { s: 'BTC',  sleeve: 'crypto', base: 10, kind: 'cx', name: 'Bitcoin' },
+    { s: 'XLE',  sleeve: 'stocks', base: 7,  kind: 'eq', name: 'Energy hedge' },
+    { s: 'IAUM', sleeve: 'gold',   base: 14, kind: 'eq', name: 'Physical gold' },
+    { s: 'GDX',  sleeve: 'gold',   base: 7,  kind: 'eq', name: 'Gold miners' },
+    { s: 'BTC',  sleeve: 'crypto', base: 8,  kind: 'cx', name: 'Bitcoin' },
     { s: 'ETH',  sleeve: 'crypto', base: 3,  kind: 'cx', name: 'Ethereum' },
     { s: 'SOL',  sleeve: 'crypto', base: 5,  kind: 'cx', name: 'Solana' },
     { s: 'LINK', sleeve: 'crypto', base: 2,  kind: 'cx', name: 'Chainlink' }
   ];
   var SYMS = ASSETS.map(function (a) { return a.s; });
-  var SLEEVES = { gold: 24, stocks: 56, crypto: 20 };
+  var SLEEVES = { gold: 21, stocks: 61, crypto: 18 };
   // how far each sleeve may move [down, up] from its base, in % of total capital; upper limits are hard,
   // lower limits relax only when a gate or risk control has to move money to cash
   var SLEEVE_BAND = { gold: [5, 5], stocks: [5, 5], crypto: [5, 0] };

@@ -119,7 +119,11 @@ function loadPrevEngine() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'zobiris-prev-engine-'));
   try {
     const f = path.join(dir, 'lagebild-engine.prev.js');
-    fs.writeFileSync(f, r.stdout);
+    // the Oct 17 base-plan revision is intended; apply it to the old engine so the lock isolates the CVaR change
+    let src = r.stdout;
+    [['VOO', 28], ['MSFT', 5], ['XLE', 7], ['IAUM', 14], ['GDX', 7], ['BTC', 8]].forEach(([sym, b]) => { src = src.replace(new RegExp("(\\{ s: '" + sym + "',[^}]*base: )\\d+"), '$1' + b); });
+    src = src.replace(/var SLEEVES = \{ gold: 24, stocks: 56, crypto: 20 \};/, 'var SLEEVES = { gold: 21, stocks: 61, crypto: 18 };');
+    fs.writeFileSync(f, src);
     return require(f);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }

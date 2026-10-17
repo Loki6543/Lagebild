@@ -50,33 +50,33 @@ test('PARAMS: key constants match the whitepaper', () => {
 
 // --- Test 2: Asset universe matches the whitepaper ---
 test('ASSETS: 12 instruments with correct base weights and sleeves', () => {
-  // Spec p.2: 56% stocks / 24% gold / 20% crypto.
-  assert.equal(ZE.SLEEVES.stocks, 56);
-  assert.equal(ZE.SLEEVES.gold, 24);
-  assert.equal(ZE.SLEEVES.crypto, 20);
+  // Base plan revised Oct 17: 61% stocks / 21% gold / 18% crypto.
+  assert.equal(ZE.SLEEVES.stocks, 61);
+  assert.equal(ZE.SLEEVES.gold, 21);
+  assert.equal(ZE.SLEEVES.crypto, 18);
   // Spec p.2: base weights.
   const byId = Object.fromEntries(ZE.ASSETS.map(a => [a.s, a]));
-  assert.equal(byId.VOO.base, 26);
+  assert.equal(byId.VOO.base, 28);
   assert.equal(byId.SMH.base, 12);
   assert.equal(byId.NVDA.base, 5);
-  assert.equal(byId.MSFT.base, 4);
+  assert.equal(byId.MSFT.base, 5);
   assert.equal(byId.TSM.base, 4);
-  assert.equal(byId.XLE.base, 5);
-  assert.equal(byId.IAUM.base, 16);
-  assert.equal(byId.GDX.base, 8);
-  assert.equal(byId.BTC.base, 10);
+  assert.equal(byId.XLE.base, 7);
+  assert.equal(byId.IAUM.base, 14);
+  assert.equal(byId.GDX.base, 7);
+  assert.equal(byId.BTC.base, 8);
   assert.equal(byId.ETH.base, 3);
   assert.equal(byId.SOL.base, 5);
   assert.equal(byId.LINK.base, 2);
-  // Sleeve sums: 26+12+5+4+4+5 = 56 (stocks); 16+8 = 24 (gold); 10+3+5+2 = 20 (crypto).
+  // Sleeve sums: 28+12+5+5+4+7 = 61 (stocks); 14+7 = 21 (gold); 8+3+5+2 = 18 (crypto).
   const sum = sleeve => ZE.ASSETS.filter(a => a.sleeve === sleeve).reduce((s, a) => s + a.base, 0);
-  assert.equal(sum('stocks'), 56);
-  assert.equal(sum('gold'), 24);
-  assert.equal(sum('crypto'), 20);
+  assert.equal(sum('stocks'), 61);
+  assert.equal(sum('gold'), 21);
+  assert.equal(sum('crypto'), 18);
 });
 
 // --- Test 3: Sleeve band projects to spec ranges ---
-test('SLEEVE_BAND: stocks 51-61, gold 19-29, crypto 15-20', () => {
+test('SLEEVE_BAND: stocks 56-66, gold 16-26, crypto 13-18', () => {
   // Spec p.5: "Equities 51-61%; gold-related 19-29%; crypto 15-20%."
   const { stocks, gold, crypto } = ZE.SLEEVE_BAND;
   // [down, up] in percentage points.
@@ -84,12 +84,12 @@ test('SLEEVE_BAND: stocks 51-61, gold 19-29, crypto 15-20', () => {
   assert.deepEqual([gold[0], gold[1]], [5, 5]);
   assert.deepEqual([crypto[0], crypto[1]], [5, 0]);
   // Effective ranges: stocks 51-61, gold 19-29, crypto 15-20.
-  assert.equal(ZE.SLEEVES.stocks - stocks[0], 51);
-  assert.equal(ZE.SLEEVES.stocks + stocks[1], 61);
-  assert.equal(ZE.SLEEVES.gold - gold[0], 19);
-  assert.equal(ZE.SLEEVES.gold + gold[1], 29);
-  assert.equal(ZE.SLEEVES.crypto - crypto[0], 15);
-  assert.equal(ZE.SLEEVES.crypto + crypto[1], 20);
+  assert.equal(ZE.SLEEVES.stocks - stocks[0], 56);
+  assert.equal(ZE.SLEEVES.stocks + stocks[1], 66);
+  assert.equal(ZE.SLEEVES.gold - gold[0], 16);
+  assert.equal(ZE.SLEEVES.gold + gold[1], 26);
+  assert.equal(ZE.SLEEVES.crypto - crypto[0], 13);
+  assert.equal(ZE.SLEEVES.crypto + crypto[1], 18);
 });
 
 // --- Test 4: NVDA look-through coefficients ---

@@ -817,7 +817,7 @@ is reweighted.</pre></div><div class="fstep"><h4>3 · Tilt</h4><pre>z = 0.8·S +
 p = base · e^(0.2·z),
   scaled to 100</pre></div><div class="fstep"><h4>4 · Smoothing</h4><pre>p = ½·p + ½·p of the run
   3 to 21 days old, before any limit</pre></div><div class="fstep"><h4>5 · Sleeves</h4><pre>exact projection:
-stocks 51–61, gold 19–29, crypto 15–20</pre></div><div class="fstep"><h4>6 · Limits</h4><pre>one upper bound per holding,
+stocks 56–66, gold 16–26, crypto 13–18</pre></div><div class="fstep"><h4>6 · Limits</h4><pre>one upper bound per holding,
 the tightest wins
 BTC ≤ 10 → excess to ballast
 NVDA look-through ≤ 10: move
@@ -869,6 +869,7 @@ shown only: 63-day sample,
 </template>
 <template id="tpl-replay">
 <h3>Replay, February 2021 to October 2026</h3>
+<p class="small">These results were computed with the previous base plan (stocks 56, gold 24, crypto 20; BTC 10, VOO 26, IAUM 16, GDX 8, MSFT 4, XLE 5). The Oct 17 revision has not been replayed yet.</p>
 <p class="small">296 weekly decisions from 2021-02-08 to 2026-10-09. Each Friday the engine sees ETF closes through Friday, crypto closes through Thursday and macro values published by Friday. Trades happen at the next session's close, at 0.10% cost for ETFs and stocks and 0.50% for crypto. Cash earns the 3-month T-bill. Gold uses GLD before IAUM existed. The first 7 weeks are blocked because SOL has too little history, so every configuration holds the base plan until late March 2021. These numbers come from the reproducible replay in the project repository (run_replay.js and analyze.py). They replace an earlier table whose turnover convention was not stated.</p>
 <div class="tw"><table class="cmp"><thead><tr><th>Rule set</th><th class="r">CAGR</th><th class="r hide-sm">Vol</th><th class="r">Max DD</th><th class="r">CE</th><th class="r hide-sm">Turnover (one-way)</th></tr></thead><tbody>
 <tr><td>Base plan</td><td class="r num">29.1%</td><td class="r num hide-sm">20.3%</td><td class="r num">37.4%</td><td class="r num">17.6%</td><td class="r num hide-sm">27%</td></tr>
@@ -964,7 +965,7 @@ shown only: 63-day sample,
 </template>
 <template id="tpl-plan">
 <h2>Base plan: medium plus</h2>
-<p>The anchor the engine tilts from, set Oct 16, 2026 and revised the same day: crypto lowered to 20% with BTC at 10% and more SOL than ETH. Fully invested, because bonds and interest-earning accounts are held elsewhere.</p>
+<p>The anchor the engine tilts from, set Oct 16, 2026 and revised Oct 17: stocks 61, gold 21, crypto 18. Two points moved from BTC to VOO, two from IAUM to XLE and one from GDX to MSFT. Fully invested, because bonds and interest-earning accounts are held elsewhere.</p>
 <div class="tw"><table id="baseTable"><thead><tr><th>Holding</th><th class="r">Base</th><th>Sleeve</th></tr></thead><tbody></tbody></table></div>
 <h3>Standing rules</h3>
 <ul>
@@ -1003,21 +1004,21 @@ shown only: 63-day sample,
 
   var VERSION = 'Zobiris Lagebild v3.1';
   var ASSETS = [
-    { s: 'VOO',  sleeve: 'stocks', base: 26, kind: 'eq', name: 'S&P 500 core' },
+    { s: 'VOO',  sleeve: 'stocks', base: 28, kind: 'eq', name: 'S&P 500 core' },
     { s: 'SMH',  sleeve: 'stocks', base: 12, kind: 'eq', name: 'Semiconductors' },
     { s: 'NVDA', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'NVIDIA' },
-    { s: 'MSFT', sleeve: 'stocks', base: 4,  kind: 'eq', name: 'Microsoft' },
+    { s: 'MSFT', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Microsoft' },
     { s: 'TSM',  sleeve: 'stocks', base: 4,  kind: 'eq', name: 'TSMC' },
-    { s: 'XLE',  sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Energy hedge' },
-    { s: 'IAUM', sleeve: 'gold',   base: 16, kind: 'eq', name: 'Physical gold' },
-    { s: 'GDX',  sleeve: 'gold',   base: 8,  kind: 'eq', name: 'Gold miners' },
-    { s: 'BTC',  sleeve: 'crypto', base: 10, kind: 'cx', name: 'Bitcoin' },
+    { s: 'XLE',  sleeve: 'stocks', base: 7,  kind: 'eq', name: 'Energy hedge' },
+    { s: 'IAUM', sleeve: 'gold',   base: 14, kind: 'eq', name: 'Physical gold' },
+    { s: 'GDX',  sleeve: 'gold',   base: 7,  kind: 'eq', name: 'Gold miners' },
+    { s: 'BTC',  sleeve: 'crypto', base: 8,  kind: 'cx', name: 'Bitcoin' },
     { s: 'ETH',  sleeve: 'crypto', base: 3,  kind: 'cx', name: 'Ethereum' },
     { s: 'SOL',  sleeve: 'crypto', base: 5,  kind: 'cx', name: 'Solana' },
     { s: 'LINK', sleeve: 'crypto', base: 2,  kind: 'cx', name: 'Chainlink' }
   ];
   var SYMS = ASSETS.map(function (a) { return a.s; });
-  var SLEEVES = { gold: 24, stocks: 56, crypto: 20 };
+  var SLEEVES = { gold: 21, stocks: 61, crypto: 18 };
   // how far each sleeve may move [down, up] from its base, in % of total capital; upper limits are hard,
   // lower limits relax only when a gate or risk control has to move money to cash
   var SLEEVE_BAND = { gold: [5, 5], stocks: [5, 5], crypto: [5, 0] };

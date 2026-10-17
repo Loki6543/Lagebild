@@ -115,7 +115,7 @@ function trailingReturns(d, win) {
   return px.slice(1).map((row, i) => row.map((v, j) => v / px[i][j] - 1));
 }
 // The plan's own limits, read from the engine so they cannot drift from it, as fractions of capital: sleeve bands (stocks
-// 51-61, gold 19-29, crypto 15-20 %), per-asset caps (BTC 10 %) and the NVDA look-through cap (NVDA + 0.08 VOO + 0.20 SMH, 10 %).
+// 56-66, gold 16-26, crypto 13-18 % since the Oct 17 base plan), per-asset caps (BTC 10 %) and the NVDA look-through cap (NVDA + 0.08 VOO + 0.20 SMH, 10 %).
 function planLimits() {
   const at = sym => ALL.indexOf(sym), groups = [], ub = {}, coef = {};
   Object.keys(ZE.SLEEVES).forEach(sl => {

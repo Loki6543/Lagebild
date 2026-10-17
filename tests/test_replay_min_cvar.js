@@ -173,9 +173,11 @@ function checkLimits(w, tol, where) {
   assert.ok(Math.abs(sum(SYMS.map((_, i) => i)) - 100) <= tol, where + ': fully invested, sum ' + sum(SYMS.map((_, i) => i)));
   w.forEach((v, i) => assert.ok(v >= -tol, where + ': long only, ' + SYMS[i] + ' = ' + v));
   const stocks = sum([0, 1, 2, 3, 4, 5]), gold = sum([6, 7]), crypto = sum([8, 9, 10, 11]);
-  assert.ok(stocks >= 51 - tol && stocks <= 61 + tol, where + ': stocks ' + stocks);
-  assert.ok(gold >= 19 - tol && gold <= 29 + tol, where + ': gold ' + gold);
-  assert.ok(crypto >= 15 - tol && crypto <= 20 + tol, where + ': crypto ' + crypto);
+  const band = sl => [ZE.SLEEVES[sl] - ZE.SLEEVE_BAND[sl][0], ZE.SLEEVES[sl] + ZE.SLEEVE_BAND[sl][1]];
+  const [sLo, sHi] = band('stocks'), [gLo, gHi] = band('gold'), [cLo, cHi] = band('crypto');
+  assert.ok(stocks >= sLo - tol && stocks <= sHi + tol, where + ': stocks ' + stocks);
+  assert.ok(gold >= gLo - tol && gold <= gHi + tol, where + ': gold ' + gold);
+  assert.ok(crypto >= cLo - tol && crypto <= cHi + tol, where + ': crypto ' + crypto);
   assert.ok(w[8] <= 10 + tol, where + ': BTC ' + w[8]);
   const look = w[2] + 0.08 * w[0] + 0.20 * w[1];
   assert.ok(look <= 10 + tol, where + ': NVDA look-through ' + look);
@@ -251,7 +253,7 @@ test('every target respects every plan limit at every decision', () => {
   });
   // the limits recorded in the run are the plan's: sleeve bands, the BTC cap and the NVDA look-through cap, as fractions of capital
   const lim = r.minCvar.limits, band = idx => lim.groups.find(g => g.idx.join() === idx);
-  [['0,1,2,3,4,5', 0.51, 0.61], ['6,7', 0.19, 0.29], ['8,9,10,11', 0.15, 0.20]].forEach(([idx, lo, hi]) => {
+  [['0,1,2,3,4,5', 0.56, 0.66], ['6,7', 0.16, 0.26], ['8,9,10,11', 0.13, 0.18]].forEach(([idx, lo, hi]) => {
     const g = band(idx); assert.ok(g, 'group ' + idx);
     assert.ok(Math.abs(g.lo - lo) < 1e-12 && Math.abs(g.hi - hi) < 1e-12, 'group ' + idx + ' ' + g.lo + ' ' + g.hi);
   });
@@ -278,7 +280,8 @@ test('trades follow the engine\'s action band: |target - current| > max(bandAbs,
 });
 
 test('a failing solver holds, trades nothing and is counted', () => {
-  const buildCost = 0.001 * 80 / 100 + 0.005 * 20 / 100;   // 80 % in ETFs and stocks, 20 % in crypto, charged once when the base plan is seeded
+  const cx = ZE.ASSETS.filter(a => a.kind === 'cx').reduce((t, a) => t + a.base, 0);
+  const buildCost = 0.001 * (100 - cx) / 100 + 0.005 * cx / 100;   // ETFs and stocks at 0.10 %, crypto at 0.50 %, charged once when the base plan is seeded
   const all = failRun('all');
   assert.equal(all.minCvar.solved, 0); assert.equal(all.minCvar.held, all.weekly.length);
   assert.equal(all.blockedWeeks, all.weekly.length); assert.equal(all.statusCount.invalid, all.weekly.length); assert.equal(all.statusCount.valid, 0);

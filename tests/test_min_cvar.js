@@ -18,12 +18,12 @@ const ZE = require('../engine/lagebild-engine.js');
 /* ---------- the Lagebild limits, as fractions of capital ---------- */
 const SYMS = ['VOO', 'SMH', 'NVDA', 'MSFT', 'TSM', 'XLE', 'IAUM', 'GDX', 'BTC', 'ETH', 'SOL', 'LINK'];
 const VOL = [.16, .32, .45, .25, .35, .25, .16, .35, .50, .70, .85, .85];   // annual, as in the engine's defaults
-const BASE = [26, 12, 5, 4, 4, 5, 16, 8, 10, 3, 5, 2].map(x => x / 100);
+const BASE = [28, 12, 5, 5, 4, 7, 14, 7, 8, 3, 5, 2].map(x => x / 100);
 const LAGEBILD = {
   groups: [
-    { idx: [0, 1, 2, 3, 4, 5], lo: 0.51, hi: 0.61 },    // stocks sleeve
-    { idx: [6, 7], lo: 0.19, hi: 0.29 },                // gold sleeve
-    { idx: [8, 9, 10, 11], lo: 0.15, hi: 0.20 }         // crypto sleeve
+    { idx: [0, 1, 2, 3, 4, 5], lo: 0.56, hi: 0.66 },    // stocks sleeve
+    { idx: [6, 7], lo: 0.16, hi: 0.26 },                // gold sleeve
+    { idx: [8, 9, 10, 11], lo: 0.13, hi: 0.18 }         // crypto sleeve
   ],
   ub: { 8: 0.10 },                                       // BTC
   lookthrough: [{ coef: { 0: 0.08, 1: 0.20, 2: 1 }, hi: 0.10 }]   // NVDA + 0.08 VOO + 0.20 SMH
@@ -73,7 +73,7 @@ function problem(k) {
   const alpha = [0.95, 0.95, 0.90, 0.975][k % 4];
   const o = JSON.parse(JSON.stringify(LAGEBILD)); o.alpha = alpha;
   if (k % 3 === 2) {
-    o.groups[2].hi = 0.15 + rnd() * 0.04 + 0.0001;       // crypto 15 % to 19 %
+    o.groups[2].hi = 0.13 + rnd() * 0.04 + 0.0001;       // crypto 13 % to 17 %
     o.ub = { 8: 0.05 + rnd() * 0.05 };                    // BTC 5 % to 10 %
     o.lookthrough[0].hi = 0.06 + rnd() * 0.04;            // look-through 6 % to 10 %
   }

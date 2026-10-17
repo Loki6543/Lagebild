@@ -8,14 +8,27 @@
    Costs: 0.10% of traded value for ETFs and stocks, 0.50% for crypto. Cash earns the 3-month T-bill.
 
    Every configuration's weekly returns are written to results/runs so analyze.py can judge the
-   whole search, not only the winner. Usage: node run_replay.js [configId ...] */
+   whole search, not only the winner. Usage: node run_replay.js [configId ...]
+
+   min_cvar is the one configuration that does not call the engine. It is the challenger proposed in
+   docs/nvidia-portfolio-optimization-review.md: each Friday it solves for the weights with the lowest 95%
+   historical expected shortfall (lib/min_cvar.js) over the trailing 252 aligned daily returns, inside the plan's
+   own limits (sleeve bands, BTC cap, NVDA look-through, long only, fully invested), then sends the target through
+   the engine's action band and the same execution, costs and cash rules. No gate, no tilts, no caps beyond those
+   limits. If the solver does not return 'optimal', or fewer than 253 aligned closes exist, it holds and counts the week.
+
+   Environment overrides (defaults unchanged): LAGEBILD_PANEL is the panel file (default data/panel/panel.json);
+   LAGEBILD_RESULTS is the results directory (default results). */
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const ZE = require('./engine/lagebild-engine.js');
+const MINCVAR = require('./lib/min_cvar.js');
 
 const HERE = __dirname;
-const P = JSON.parse(fs.readFileSync(path.join(HERE, 'data/panel/panel.json'), 'utf8'));
+const PANEL = process.env.LAGEBILD_PANEL || path.join(HERE, 'data/panel/panel.json');
+const RESULTS = process.env.LAGEBILD_RESULTS || path.join(HERE, 'results');
+const P = JSON.parse(fs.readFileSync(PANEL, 'utf8'));
 const EQ = ['VOO', 'SMH', 'NVDA', 'MSFT', 'TSM', 'XLE', 'IAUM', 'GDX'], CX = ['BTC', 'ETH', 'SOL', 'LINK'], ALL = EQ.concat(CX);
 const START = '2021-02-05', END = '2026-10-09';
 const COST = { eq: 0.001, cx: 0.005 };
@@ -46,7 +59,8 @@ const CONFIGS = [
   { id: 'v3_nogate', label: 'v3 without BTC gate', opts: { monthlyGate: false } },
   { id: 'v3_gate8', label: 'v3, gate 8 months', opts: {}, params: { gateMonths: 8 } },
   { id: 'v3_gate12', label: 'v3, gate 12 months', opts: {}, params: { gateMonths: 12 } },
-  { id: 'tilts_only', label: 'Tilts only, no gate or caps', opts: { monthlyGate: false, volCap: false, cryptoCap: false } }
+  { id: 'tilts_only', label: 'Tilts only, no gate or caps', opts: { monthlyGate: false, volCap: false, cryptoCap: false } },
+  { id: 'min_cvar', label: 'Minimum CVaR within the plan limits', minCvar: { alpha: 0.95, window: 252 } }   // trial 23
 ];
 
 /* ---------- data access ---------- */
@@ -86,6 +100,33 @@ function weekKey(iso) { const d = new Date(iso + 'T00:00:00Z'); const day = (d.g
 const DECISIONS = [];
 for (let i = 0; i < DATES.length; i++) { const d = DATES[i]; if (d < START || d > END) continue; if (i + 1 >= DATES.length || weekKey(DATES[i + 1]) !== weekKey(d)) DECISIONS.push(d); }
 
+/* ---------- minimum-CVaR challenger: inputs and plan limits ---------- */
+// Trailing aligned daily simple returns on the US trading calendar, built from what engineInput hands the engine: equity
+// closes through the decision day, crypto closes through the day before (carried forward across the last session), so
+// nothing after the decision is used. Returns null while any of the 12 assets lacks win + 1 aligned closes.
+function trailingReturns(d, win) {
+  const k = DATES.indexOf(d); if (k < win) return null;
+  const cxCut = dayBefore(d), px = [];
+  for (let i = k - win; i <= k; i++) {
+    const row = [];
+    for (const s of ALL) { const v = valueAt(PX[s], CX.includes(s) && DATES[i] > cxCut ? cxCut : DATES[i]); if (!(v > 0)) return null; row.push(v); }
+    px.push(row);
+  }
+  return px.slice(1).map((row, i) => row.map((v, j) => v / px[i][j] - 1));
+}
+// The plan's own limits, read from the engine so they cannot drift from it, as fractions of capital: sleeve bands (stocks
+// 51-61, gold 19-29, crypto 15-20 %), per-asset caps (BTC 10 %) and the NVDA look-through cap (NVDA + 0.08 VOO + 0.20 SMH, 10 %).
+function planLimits() {
+  const at = sym => ALL.indexOf(sym), groups = [], ub = {}, coef = {};
+  Object.keys(ZE.SLEEVES).forEach(sl => {
+    const idx = ZE.ASSETS.filter(a => a.sleeve === sl).map(a => at(a.s));
+    groups.push({ idx: idx, lo: (ZE.SLEEVES[sl] - ZE.SLEEVE_BAND[sl][0]) / 100, hi: (ZE.SLEEVES[sl] + ZE.SLEEVE_BAND[sl][1]) / 100 });
+  });
+  Object.keys(ZE.ASSET_CAP).forEach(sym => { ub[at(sym)] = ZE.ASSET_CAP[sym] / 100; });
+  Object.keys(ZE.LOOK).forEach(sym => { coef[at(sym)] = ZE.LOOK[sym]; });
+  return { groups: groups, ub: ub, lookthrough: [{ coef: coef, hi: ZE.PARAMS.nvdaLookCap / 100 }] };
+}
+
 /* ---------- one configuration ---------- */
 function run(cfg) {
   Object.assign(ZE.PARAMS, JSON.parse(JSON.stringify(DEFAULT_PARAMS)), cfg.params || {});
@@ -98,6 +139,7 @@ function run(cfg) {
   turnover += 0.5;   // building the first portfolio counts as half a one-way turn, the same for every configuration
   let prevRun = null, pending = null, blocked = 0, statusCount = { valid: 0, degraded: 0, invalid: 0 };
   const daily = [], weekly = [], weights = [];
+  const mc = cfg.minCvar ? { limits: planLimits(), targets: [], byStatus: {}, solved: 0, held: 0, first: null } : null;
   const decisionAt = new Set(DECISIONS);
   for (let i = iStart; i < DATES.length && DATES[i] <= END; i++) {
     const d = DATES[i], dp = DATES[i - 1];
@@ -120,7 +162,25 @@ function run(cfg) {
     }
     nav = cash + ALL.reduce((t, s) => t + val[s], 0);
     daily.push([d, nav]);
-    if (decisionAt.has(d)) {
+    if (decisionAt.has(d) && cfg.minCvar) {
+      // challenger: optimise, then trade only what leaves the engine's action band, at the next close like every other configuration
+      const rets = trailingReturns(d, cfg.minCvar.window);
+      const sol = rets ? MINCVAR.minCvarWeights(rets, Object.assign({ alpha: cfg.minCvar.alpha }, mc.limits)) : { status: 'insufficient_history' };
+      const tot = ALL.reduce((t, s) => t + val[s], 0) + Math.max(0, cash);   // holdings marked as the engine marks them
+      const cur = ALL.map(s => val[s] / tot * 100), status = sol.status === 'optimal' && !(tot > 0) ? 'no_capital' : sol.status, ok = status === 'optimal';
+      const tgt = ok ? sol.weights.map(x => x * 100) : null, traded = [];
+      mc.byStatus[status] = (mc.byStatus[status] || 0) + 1;
+      if (ok) {
+        pending = {};
+        ALL.forEach((s, j) => { if (Math.abs(tgt[j] - cur[j]) > Math.max(ZE.PARAMS.bandAbs, ZE.PARAMS.bandRel * cur[j])) { pending[s] = tgt[j]; traded.push(s); } });
+        if (!traded.length) pending = null;
+        statusCount.valid++; mc.solved++; if (!mc.first) mc.first = d;
+      } else { statusCount.invalid++; blocked++; mc.held++; }   // hold: nothing is traded and the week is counted
+      mc.targets.push({ d: d, status: status, w: tgt, cur: cur, traded: traded, cvar: ok ? sol.cvar : null });
+      weekly.push([d, nav, cashIdx]);
+      const sleeve = sl => tgt ? Math.round(ALL.reduce((t, s, j) => t + (ZE.ASSETS.find(a => a.s === s).sleeve === sl ? tgt[j] : 0), 0) * 10) / 10 : null;
+      weights.push([d, ok ? 'valid' : 'invalid', sleeve('stocks'), sleeve('gold'), sleeve('crypto'), ok ? 0 : null, null]);
+    } else if (decisionAt.has(d)) {
       const units = {}; ALL.forEach(s => { const pxs = CX.includes(s) ? valueAt(PX[s], dayBefore(d)) : valueAt(PX[s], d); units[s] = pxs ? val[s] / pxs : 0; });
       const res = ZE.compute(engineInput(d, { units: units, cash: Math.max(0, cash), asOf: d }), prevRun, null, opts);
       statusCount[res.status] = (statusCount[res.status] || 0) + 1;
@@ -136,14 +196,19 @@ function run(cfg) {
     }
   }
   const years = (Date.parse(daily[daily.length - 1][0]) - Date.parse(daily[0][0])) / (365.25 * 864e5);
-  return { id: cfg.id, label: cfg.label, opts: cfg.opts, params: cfg.params || {}, engine: ZE.VERSION, start: daily[0][0], end: daily[daily.length - 1][0],
+  const out = { id: cfg.id, label: cfg.label, opts: cfg.opts, params: cfg.params || {}, engine: ZE.VERSION, start: daily[0][0], end: daily[daily.length - 1][0],
     years: years, turnoverOneWayPerYear: turnover / years, costPaid: costPaid, blockedWeeks: blocked, statusCount: statusCount,
     weekly: weekly, daily: daily, weights: weights };
+  if (mc) {   // audit trail for the challenger only: every decision's target, current holdings, trades and solver status
+    out.minCvar = { alpha: cfg.minCvar.alpha, window: cfg.minCvar.window, solved: mc.solved, held: mc.held, byStatus: mc.byStatus, firstSolved: mc.first, limits: mc.limits, symbols: ALL };
+    out.targets = mc.targets;
+  }
+  return out;
 }
 
 /* ---------- main ---------- */
 const want = process.argv.slice(2), todo = want.length ? CONFIGS.filter(c => want.includes(c.id)) : CONFIGS;
-const outDir = path.join(HERE, 'results/runs'); fs.mkdirSync(outDir, { recursive: true });
+const outDir = path.join(RESULTS, 'runs'); fs.mkdirSync(outDir, { recursive: true });
 const t0 = Date.now();
 todo.forEach(cfg => {
   const t1 = Date.now(), r = run(cfg);
@@ -151,5 +216,5 @@ todo.forEach(cfg => {
   const navEnd = r.daily[r.daily.length - 1][1];
   console.log(`${cfg.id.padEnd(12)} nav ${navEnd.toFixed(3)}  cagr ${((Math.pow(navEnd, 1 / r.years) - 1) * 100).toFixed(1)}%  turnover ${(r.turnoverOneWayPerYear * 100).toFixed(0)}%/yr  blocked ${r.blockedWeeks}w  ${((Date.now() - t1) / 1000).toFixed(1)}s`);
 });
-fs.writeFileSync(path.join(HERE, 'results/configs.json'), JSON.stringify({ engine: ZE.VERSION, start: START, end: END, decisions: DECISIONS.length, configs: CONFIGS }, null, 1));
+fs.writeFileSync(path.join(RESULTS, 'configs.json'), JSON.stringify({ engine: ZE.VERSION, start: START, end: END, decisions: DECISIONS.length, configs: CONFIGS }, null, 1));
 console.log(`${todo.length} configurations, ${DECISIONS.length} weekly decisions, ${((Date.now() - t0) / 1000).toFixed(0)}s`);

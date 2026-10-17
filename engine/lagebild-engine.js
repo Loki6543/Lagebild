@@ -1,4 +1,4 @@
-/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792207581-0367).
+/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792233149-eafe).
    Do not edit here: change the app, then copy the engine again so the replay always tests the shipped code. */
 /* Zobiris Lagebild allocation engine v3.0
    v3 answers the October 16 formula review: volatility-scaled log signals, reduced macro authority,
@@ -314,6 +314,35 @@
       volL: volL, volE: volE, srcVol: srcVol, psd: { base: pb.repaired, ewma: pe.repaired, sample: ps.repaired, minEigBase: pb.minEig }
     };
   }
+  /* ---------- diagnostic only: 1-day historical expected shortfall (CVaR), never an input to any weight, action, check or status ---------- */
+  var CVAR_ALPHA = 0.95, CVAR_MIN_DAYS = 60;
+  // portfolio simple return per day from the aligned log-return panel: sum of (w_i / 100) x (exp(r_i) - 1), cash earns 0;
+  // null when a held asset has no aligned returns or a weight is not a finite number
+  function portReturns(ar, w) {
+    if (!ar || !ar.R || !(ar.n > 0)) return null;
+    var held = [], i, t, s, r, out = [];
+    for (i = 0; i < SYMS.length; i++) {
+      s = SYMS[i];
+      if (!isNum(w[s])) return null;
+      if (w[s] !== 0) { if (!ar.R[s] || ar.R[s].length < ar.n) return null; held.push(s); }
+    }
+    for (t = 0; t < ar.n; t++) { r = 0; for (i = 0; i < held.length; i++) r += w[held[i]] / 100 * (Math.exp(ar.R[held[i]][t]) - 1); out.push(r); }
+    return out;
+  }
+  // Rockafellar-Uryasev expected shortfall: mean loss over the worst (1 - alpha) share of days, with a fractional weight on the
+  // boundary day. A positive result is a loss fraction; null when the series is empty or holds a non-finite return.
+  function histCvar(rets, alpha) {
+    var a = alpha == null ? CVAR_ALPHA : alpha;
+    if (!rets || !rets.length || !(a > 0 && a < 1)) return null;
+    var n = rets.length, k = (1 - a) * n, loss = [], i, m, s = 0;
+    for (i = 0; i < n; i++) { if (!isNum(rets[i])) return null; loss.push(-rets[i]); }
+    loss.sort(function (x, y) { return y - x; });
+    m = Math.min(Math.floor(k), n);
+    for (i = 0; i < m; i++) s += loss[i];
+    if (m < n) s += (k - m) * loss[m];
+    return s / k + 0;
+  }
+
   function avgCorr(corr, syms, set) {
     var idx = set.map(function (s) { return syms.indexOf(s); }).filter(function (i) { return i >= 0; }), s = 0, c = 0;
     for (var a = 0; a < idx.length; a++) for (var b = a + 1; b < idx.length; b++) { var v = corr[idx[a]][idx[b]]; if (v != null) { s += v; c++; } }
@@ -798,7 +827,9 @@
       else if (o.id === 'oi' && D0.oi30d == null) o.have = false;
       return gradeInput(o, nowISO);
     });
-    var status = assessRun(evidence, { missing: missing, gateUnchecked: !!opts.monthlyGate && gates.btc.on == null, riskOk: !!RM.ar && isNum(rk.vol), checksOk: !failed.length });
+    // every risk number the run publishes must be finite: a constant or zero price series gives NaN in the correlations or the drawdown
+    var riskFinite = isNum(rk.vol) && isNum(rkE.vol) && (!dd || (isNum(dd.D) && isNum(dd.maxDD) && isNum(dd.m)));
+    var status = assessRun(evidence, { missing: missing, gateUnchecked: !!opts.monthlyGate && gates.btc.on == null, riskOk: !!RM.ar && riskFinite, checksOk: !failed.length });
     var blocked = status.status === 'invalid';
     if (blocked) notes.push('Fail closed: ' + status.blockers.length + ' blocker' + (status.blockers.length > 1 ? 's' : '') + ', so this run gives no actionable targets.');
 
@@ -854,6 +885,13 @@
     var rnd = function (o) { var r = {}; Object.keys(o).forEach(function (k) { r[k] = r2(o[k]); }); return r; };
     var bounds = {}; syms.forEach(function (s) { var u = Math.min(ubB[s] != null ? ubB[s] : Infinity, ubC[s] != null ? ubC[s] : Infinity); if (u < Infinity) bounds[s] = r2(u); });
     var corrOut = { syms: syms, m: RM.Rsample.map(function (row) { return row.map(r2); }), window: RM.ar63 ? { n: RM.ar63.n, from: RM.ar63.from, to: RM.ar63.to } : null };
+    // 11. diagnostic only: 1-day historical expected shortfall at 95% of the final target and of the base plan, on the risk model's aligned window
+    var cvar = null;
+    if (RM.ar && RM.ar.n >= CVAR_MIN_DAYS) {
+      var baseW = {}; ASSETS.forEach(function (a) { baseW[a.s] = a.base; });
+      var cvT = histCvar(portReturns(RM.ar, w), CVAR_ALPHA), cvB = histCvar(portReturns(RM.ar, baseW), CVAR_ALPHA);
+      if (isNum(cvT) && isNum(cvB)) cvar = { alpha: CVAR_ALPHA, horizon: '1d', n: RM.ar.n, from: RM.ar.from, to: RM.ar.to, target: r4(cvT), base: r4(cvB) };
+    }
     return {
       engine: VERSION, asOf: inp.now || new Date().toISOString(),
       policy: { macroWeight: mw, kappa: PARAMS.kappa, ddOverlay: !!opts.ddOverlay, altGate: !!opts.altGate, gradedGate: !!opts.gradedGate, monthlyGate: !!opts.monthlyGate, cryptoCap: !!opts.cryptoCap, volCap: !!opts.volCap },
@@ -869,7 +907,7 @@
         volsEwma: syms.reduce(function (o, x) { o[x] = r4(RM.volE[x]); return o; }, {}),
         shrink: { delta: r4(RM.delta), lw: RM.lwRaw != null ? r4(RM.lwRaw) : null, rbar: r4(RM.rbar), psd: RM.psd },
         stress: { avgEwma: avgE != null ? r2(avgE) : null, avg63: avgS != null ? r2(avgS) : null, spike: spike }, dd: dd,
-        cryptoScale: r4(E.aStar), volScale: r4(E.volScale) },
+        cryptoScale: r4(E.aStar), volScale: r4(E.volScale), cvar: cvar },
       checks: checks, checksOk: !failed.length, relaxed: relaxed,
       shadows: shadows, clusters: clusters,
       corr: corrOut, actions: actions, actionBasis: basis,
@@ -882,6 +920,6 @@
   var api = { VERSION: VERSION, fedWatchOdds: fedWatchOdds, riskBudget: riskBudget, clusterAssets: clusterAssets, fedOdds: fedOdds, Phi: Phi,
     ASSETS: ASSETS, SLEEVES: SLEEVES, SLEEVE_BAND: SLEEVE_BAND, ASSET_CAP: ASSET_CAP, PARAMS: PARAMS, DEFAULT_OPTS: DEFAULT_OPTS, FOMC: FOMC, LOOK: LOOK,
     parse: parse, compute: compute, regimeList: regimeList, monthEndCloses: monthEndCloses, gradeInput: gradeInput, assessRun: assessRun,
-    _internal: { enforce: enforce, verify: verify, cryptoScale: cryptoScale, projectSleeves: projectSleeves, psdCorr: psdCorr, jacobiEig: jacobiEig, ledoitWolf: ledoitWolf, portRisk: portRisk, cryptoShareOf: cryptoShareOf, markHoldings: markHoldings } };
+    _internal: { enforce: enforce, verify: verify, cryptoScale: cryptoScale, projectSleeves: projectSleeves, psdCorr: psdCorr, jacobiEig: jacobiEig, ledoitWolf: ledoitWolf, portRisk: portRisk, cryptoShareOf: cryptoShareOf, markHoldings: markHoldings, histCvar: histCvar, portReturns: portReturns } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ZE = api;
 })(typeof window !== 'undefined' ? window : this);

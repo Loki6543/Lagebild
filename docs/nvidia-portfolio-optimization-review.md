@@ -27,10 +27,43 @@ milliseconds on a CPU.
    Rockafellar–Uryasev fractional tail. `analyze.py` reports it per configuration in a new "Weekly CVaR 95%" column.
    It is a diagnostic only and changes no target. Tests check it against a hand-computed tail and the normal-distribution
    value (2.063σ).
-2. **A minimum-CVaR challenger in the replay. Proposed, not built.** Within the same sleeve bands and caps, solve for the
-   weights with the lowest CVaR (CPU, `scipy.optimize.linprog`) and add it as one more replay configuration. It would test
-   whether an optimiser beats the fixed base plan out of sample. Adding it adds a trial, which raises the deflated-Sharpe
-   bar for every configuration, so it is worth doing once, not as a parameter sweep.
+2. **A minimum-CVaR challenger in the replay. Built, awaiting the next replay run with the raw panel.** Within the plan's
+   limits it solves for the weights with the lowest CVaR and runs as one more replay configuration, `min_cvar` ("Minimum
+   CVaR within the plan limits"). It tests whether an optimiser beats the fixed base plan out of sample. No result exists
+   yet: the replay needs `data/panel/panel.json`, which is built from raw downloads that are not in git, so the per-run
+   file and the report row appear only after the next `run_replay.js` and `analyze.py` run.
+   - **Solver.** `lib/min_cvar.js` is a dense two-phase simplex in plain Node, with no dependencies. It solves the
+     Rockafellar–Uryasev linear programme (minimise ζ + Σuₜ / ((1 − α)T), with uₜ ≥ −(rₜ·w) − ζ and uₜ ≥ 0), and it
+     returns a status instead of throwing: `infeasible`, `unbounded` or `iteration_limit` (plus `invalid_input` and
+     `numerical_error` as guards). Dantzig pricing switches to Bland's rule after a run of degenerate pivots, so it cannot
+     cycle. A 252-day, 12-asset problem solves in roughly 10 to 70 milliseconds. The tests compare its objective with
+     `scipy.optimize.linprog(method='highs')` on 36 seeded problems with 60 to 260 days of fat-tailed returns, and on 60
+     degenerate generic programmes; they require 1e-7 relative agreement.
+   - **Inputs.** At each decision date, the trailing 252 aligned daily simple returns of the 12 assets, built from what
+     the engine sees: equities through the decision day, crypto through the day before. The tests change all later data
+     and check that the target does not move.
+   - **Constraints (the plan's limits only).** Long only, fully invested, sleeve bands (stocks 51–61%, gold 19–29%,
+     crypto 15–20%), BTC at most 10%, and NVDA + 0.08 VOO + 0.20 SMH at most 10%, all read from the engine's constants.
+     The 24% volatility ceiling and the crypto risk-share cap are not imposed, and there is no BTC gate and no tilt.
+   - **Execution.** The target goes through the same action band as the engine: an asset trades only when
+     |target − current| > max(1.5 points, 20% of current). Trades then execute at the next session's close with the same
+     costs and cash rule as every other configuration. A fully invested target executed through a band can leave cash idle
+     until positions leave their band; read the run's cash and turnover with that in mind.
+   - **Fail closed.** If the solver returns anything but `optimal`, or fewer than 253 aligned closes exist, the week holds:
+     no trades, counted in `blockedWeeks` and in the run's `minCvar.byStatus`. SOL's history starts on 2020-08-11, so the
+     first solve cannot come before about August 2021; the earlier weeks hold the seeded base plan.
+   - **Audit trail.** `results/runs/min_cvar.json` also stores each decision's target, current weights, trades and CVaR.
+   - **One trial.** The challenger raises the count from 22 to 23 configurations. The deflated Sharpe ratio charges for
+     the best result expected from unskilled trials, and that bar rises with the number of trials, so adding the challenger
+     raises the bar for every configuration. That is why it is added once, with the level (95%) and window (252 days)
+     fixed in advance, and not as a parameter sweep.
+   - **What to expect.** A linear-programme optimum sits at a vertex of the limits, so the targets will be concentrated at
+     the bounds. It uses no expected-return estimate, which is what makes mean-CVaR fragile (see "Not worth taking"), but
+     the tail of one year of history is still a noisy input. The report should be read for out-of-sample tail loss and
+     turnover, not for the in-sample CVaR the optimiser minimised.
+   - **Overrides for tests.** `LAGEBILD_PANEL` sets the panel file and `LAGEBILD_RESULTS` the results directory. Both
+     default to the old paths, and the tests check that the earlier configurations' output is byte-identical to the
+     previous script's.
 3. **CVaR in the app's risk panel. Proposed, not built.** This would show the current target's historical 95% weekly CVaR
    next to its volatility. It touches the engine and the app copy together, so it belongs in its own change, with the
    engine-and-app equality check.
@@ -60,5 +93,11 @@ milliseconds on a CPU.
 
 - `python3 -m pytest -q tests`: 10 passed, including the new CVaR test.
 - `node --test tests/test_engine_coverage.js`: 10/10.
-- The CVaR column appears in `results/REPORT.md` after the next `run_replay.js` and `analyze.py` run. The per-run files
-  are not in git.
+- `node --test tests/test_min_cvar.js`: 13/13. Hand cases with known answers, the simplex edge cases (Beale's cycling
+  example, infeasible, unbounded), and the HiGHS comparison. The comparison is skipped with a message if python3 cannot
+  import scipy.
+- `node --test tests/test_replay_min_cvar.js`: 10/10 on a synthetic panel in a temporary directory: limits at every
+  decision, the action band, hold-and-count on solver failure, no lookahead, and byte-identical output for the
+  earlier configurations.
+- The CVaR column and the `min_cvar` row appear in `results/REPORT.md` after the next `run_replay.js` and `analyze.py`
+  run. The per-run files are not in git.

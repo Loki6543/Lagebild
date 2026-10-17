@@ -1,4 +1,4 @@
-/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792233149-eafe).
+/* Copied verbatim from the published Zobiris Lagebild app (artifact KNEopyQGNjuo5StoLe9HyG, version 1792234424-a7f4).
    Do not edit here: change the app, then copy the engine again so the replay always tests the shipped code. */
 /* Zobiris Lagebild allocation engine v3.0
    v3 answers the October 16 formula review: volatility-scaled log signals, reduced macro authority,

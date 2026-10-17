@@ -253,7 +253,7 @@ test('every target respects every plan limit at every decision', () => {
   });
   // the limits recorded in the run are the plan's: sleeve bands, the BTC cap and the NVDA look-through cap, as fractions of capital
   const lim = r.minCvar.limits, band = idx => lim.groups.find(g => g.idx.join() === idx);
-  [['0,1,2,3,4,5', 0.56, 0.66], ['6,7', 0.16, 0.26], ['8,9,10,11', 0.13, 0.18]].forEach(([idx, lo, hi]) => {
+  [['0,1,2,3,4,5', 0.57, 0.67], ['6,7', 0.16, 0.26], ['8,9,10,11', 0.12, 0.17]].forEach(([idx, lo, hi]) => {
     const g = band(idx); assert.ok(g, 'group ' + idx);
     assert.ok(Math.abs(g.lo - lo) < 1e-12 && Math.abs(g.hi - hi) < 1e-12, 'group ' + idx + ' ' + g.lo + ' ' + g.hi);
   });

@@ -817,7 +817,7 @@ is reweighted.</pre></div><div class="fstep"><h4>3 · Tilt</h4><pre>z = 0.8·S +
 p = base · e^(0.2·z),
   scaled to 100</pre></div><div class="fstep"><h4>4 · Smoothing</h4><pre>p = ½·p + ½·p of the run
   3 to 21 days old, before any limit</pre></div><div class="fstep"><h4>5 · Sleeves</h4><pre>exact projection:
-stocks 56–66, gold 16–26, crypto 13–18</pre></div><div class="fstep"><h4>6 · Limits</h4><pre>one upper bound per holding,
+stocks 57–67, gold 16–26, crypto 12–17</pre></div><div class="fstep"><h4>6 · Limits</h4><pre>one upper bound per holding,
 the tightest wins
 BTC ≤ 10 → excess to ballast
 NVDA look-through ≤ 10: move
@@ -965,7 +965,7 @@ shown only: 63-day sample,
 </template>
 <template id="tpl-plan">
 <h2>Base plan: medium plus</h2>
-<p>The anchor the engine tilts from, set Oct 16, 2026 and revised Oct 17: stocks 61, gold 21, crypto 18. Two points moved from BTC to VOO, two from IAUM to XLE and one from GDX to MSFT. Fully invested, because bonds and interest-earning accounts are held elsewhere.</p>
+<p>The anchor the engine tilts from, set Oct 16, 2026 and revised Oct 17: stocks 62, gold 21, crypto 17. Two points moved from BTC to VOO, two from IAUM to XLE, one from GDX to MSFT and one from NVDA to XLE; ETH was sold out of the plan, its 3 points going one each to LINK, SMH and SOL. ETH is still tracked at 0%, so its feed can no longer block a run. Fully invested, because bonds and interest-earning accounts are held elsewhere.</p>
 <div class="tw"><table id="baseTable"><thead><tr><th>Holding</th><th class="r">Base</th><th>Sleeve</th></tr></thead><tbody></tbody></table></div>
 <h3>Standing rules</h3>
 <ul>
@@ -1005,20 +1005,20 @@ shown only: 63-day sample,
   var VERSION = 'Zobiris Lagebild v3.1';
   var ASSETS = [
     { s: 'VOO',  sleeve: 'stocks', base: 28, kind: 'eq', name: 'S&P 500 core' },
-    { s: 'SMH',  sleeve: 'stocks', base: 12, kind: 'eq', name: 'Semiconductors' },
-    { s: 'NVDA', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'NVIDIA' },
+    { s: 'SMH',  sleeve: 'stocks', base: 13, kind: 'eq', name: 'Semiconductors' },
+    { s: 'NVDA', sleeve: 'stocks', base: 4,  kind: 'eq', name: 'NVIDIA' },
     { s: 'MSFT', sleeve: 'stocks', base: 5,  kind: 'eq', name: 'Microsoft' },
     { s: 'TSM',  sleeve: 'stocks', base: 4,  kind: 'eq', name: 'TSMC' },
-    { s: 'XLE',  sleeve: 'stocks', base: 7,  kind: 'eq', name: 'Energy hedge' },
+    { s: 'XLE',  sleeve: 'stocks', base: 8,  kind: 'eq', name: 'Energy hedge' },
     { s: 'IAUM', sleeve: 'gold',   base: 14, kind: 'eq', name: 'Physical gold' },
     { s: 'GDX',  sleeve: 'gold',   base: 7,  kind: 'eq', name: 'Gold miners' },
     { s: 'BTC',  sleeve: 'crypto', base: 8,  kind: 'cx', name: 'Bitcoin' },
-    { s: 'ETH',  sleeve: 'crypto', base: 3,  kind: 'cx', name: 'Ethereum' },
-    { s: 'SOL',  sleeve: 'crypto', base: 5,  kind: 'cx', name: 'Solana' },
-    { s: 'LINK', sleeve: 'crypto', base: 2,  kind: 'cx', name: 'Chainlink' }
+    { s: 'ETH',  sleeve: 'crypto', base: 0,  kind: 'cx', name: 'Ethereum' },
+    { s: 'SOL',  sleeve: 'crypto', base: 6,  kind: 'cx', name: 'Solana' },
+    { s: 'LINK', sleeve: 'crypto', base: 3,  kind: 'cx', name: 'Chainlink' }
   ];
   var SYMS = ASSETS.map(function (a) { return a.s; });
-  var SLEEVES = { gold: 21, stocks: 61, crypto: 18 };
+  var SLEEVES = { gold: 21, stocks: 62, crypto: 17 };
   // how far each sleeve may move [down, up] from its base, in % of total capital; upper limits are hard,
   // lower limits relax only when a gate or risk control has to move money to cash
   var SLEEVE_BAND = { gold: [5, 5], stocks: [5, 5], crypto: [5, 0] };
@@ -1819,7 +1819,8 @@ shown only: 63-day sample,
     });
     // every risk number the run publishes must be finite: a constant or zero price series gives NaN in the correlations or the drawdown
     var riskFinite = isNum(rk.vol) && isNum(rkE.vol) && (!dd || (isNum(dd.D) && isNum(dd.maxDD) && isNum(dd.m)));
-    var status = assessRun(evidence, { missing: missing, gateUnchecked: !!opts.monthlyGate && gates.btc.on == null, riskOk: !!RM.ar && riskFinite, checksOk: !failed.length });
+    var heldMissing = missing.filter(function (s) { return ASSETS[SYMS.indexOf(s)].base > 0; });   // a holding with no base weight cannot block the run
+    var status = assessRun(evidence, { missing: heldMissing, gateUnchecked: !!opts.monthlyGate && gates.btc.on == null, riskOk: !!RM.ar && riskFinite, checksOk: !failed.length });
     var blocked = status.status === 'invalid';
     if (blocked) notes.push('Fail closed: ' + status.blockers.length + ' blocker' + (status.blockers.length > 1 ? 's' : '') + ', so this run gives no actionable targets.');
 
@@ -3300,13 +3301,14 @@ async function loadExtrasCache() {
 /* ---------- input records: source, units, observation date, retrieval time ---------- */
 function lastObs(ser){ return ser && ser.length ? String(ser[ser.length-1].d).slice(0,10) : null; }
 function monthEndISO(m){ return new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7), 0)).toISOString().slice(0,10); }
+function baseOf(s){ var a = ZE.ASSETS.filter(function(x){ return x.s === s; })[0]; return a ? a.base : 0; }
 function buildEvidence(inp){
   var M = state.meta || {}, now = inp.now, out = [];
   function add(r){ var mm = M[r.id] || {}; r.source = mm.source || r.source; r.retrievedAt = mm.at || null; r.fallback = !!mm.fallback; out.push(r); }
   EQ.forEach(function(s){ var ser = inp.prices[s]; add({ id: s, asset: s, label: s + ' daily closes', role: 'critical', source: 'Twelve Data', units: 'USD close', have: !!(ser && ser.length), observedAt: lastObs(ser), maxAgeDays: 4, hardAgeDays: 7 }); });
   CX.forEach(function(s){ var d = inp.prices[s], l = inp.cryptoLong[s];
-    add({ id: s, asset: s, label: s + ' daily closes', role: 'critical', source: 'CoinDesk', units: 'USD, 00:00 UTC bars', have: !!(d && d.length), observedAt: lastObs(d), maxAgeDays: 2, hardAgeDays: 5 });
-    add({ id: s + '_l', asset: s, label: s + ' 3-day bars', role: 'critical', source: 'CoinDesk', units: 'USD, trend bars', have: !!(l && l.length), observedAt: lastObs(l), maxAgeDays: 4, hardAgeDays: 9 });
+    add({ id: s, asset: s, label: s + ' daily closes', role: baseOf(s) > 0 ? 'critical' : 'optional', source: 'CoinDesk', units: 'USD, 00:00 UTC bars', have: !!(d && d.length), observedAt: lastObs(d), maxAgeDays: 2, hardAgeDays: 5 });
+    add({ id: s + '_l', asset: s, label: s + ' 3-day bars', role: baseOf(s) > 0 ? 'critical' : 'optional', source: 'CoinDesk', units: 'USD, trend bars', have: !!(l && l.length), observedAt: lastObs(l), maxAgeDays: 4, hardAgeDays: 9 });
   });
   var bm = inp.btcMonthly ? ZE.monthEndCloses(inp.btcMonthly, now.slice(0,10)) : [], lm = bm.length ? bm[bm.length-1].m : null;
   var pd = new Date(now); pd.setUTCDate(1); pd.setUTCMonth(pd.getUTCMonth() - 1); var pm = pd.toISOString().slice(0,7);

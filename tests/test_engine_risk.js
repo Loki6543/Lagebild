@@ -121,8 +121,9 @@ function loadPrevEngine() {
     const f = path.join(dir, 'lagebild-engine.prev.js');
     // the Oct 17 base-plan revision is intended; apply it to the old engine so the lock isolates the CVaR change
     let src = r.stdout;
-    [['VOO', 28], ['MSFT', 5], ['XLE', 7], ['IAUM', 14], ['GDX', 7], ['BTC', 8]].forEach(([sym, b]) => { src = src.replace(new RegExp("(\\{ s: '" + sym + "',[^}]*base: )\\d+"), '$1' + b); });
-    src = src.replace(/var SLEEVES = \{ gold: 24, stocks: 56, crypto: 20 \};/, 'var SLEEVES = { gold: 21, stocks: 61, crypto: 18 };');
+    [['VOO', 28], ['SMH', 13], ['NVDA', 4], ['MSFT', 5], ['XLE', 8], ['IAUM', 14], ['GDX', 7], ['BTC', 8], ['ETH', 0], ['SOL', 6], ['LINK', 3]].forEach(([sym, b]) => { src = src.replace(new RegExp("(\\{ s: '" + sym + "',[^}]*base: )\\d+"), '$1' + b); });
+    src = src.replace(/var SLEEVES = \{ gold: 24, stocks: 56, crypto: 20 \};/, 'var SLEEVES = { gold: 21, stocks: 62, crypto: 17 };');
+    src = src.replace('var status = assessRun(evidence, { missing: missing,', 'var heldMissing = missing.filter(function (s) { return ASSETS[SYMS.indexOf(s)].base > 0; });\n    var status = assessRun(evidence, { missing: heldMissing,');
     fs.writeFileSync(f, src);
     return require(f);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }

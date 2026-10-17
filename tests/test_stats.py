@@ -43,6 +43,14 @@ def test_pbo_is_near_half_for_pure_noise():
     assert 0.3 < pbo < 0.7
 
 
+def test_cvar_matches_tail_mean_and_normal_case():
+    x = np.arange(1, 101) / -100.0                       # losses 1% .. 100%
+    assert abs(S.cvar(x, 0.95) - np.mean(np.arange(96, 101) / 100)) < 1e-12
+    assert abs(S.cvar(x[:10], 0.95) - 0.10) < 1e-12       # half an observation: still the single worst loss
+    z = np.random.default_rng(5).normal(0, 1, 400_000)
+    assert abs(S.cvar(z, 0.95) - 2.0627) < 0.02           # phi(1.645) / 0.05 for a standard normal
+
+
 def test_regime_correlation_sees_crash_convergence():
     rng = np.random.default_rng(4)
     t, n = 400, 6

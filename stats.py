@@ -56,6 +56,20 @@ def deflated_sharpe(x, trial_srs, n_trials):
     return psr(x, sr_star), sr_star
 
 
+def cvar(returns, alpha=0.95):
+    """Historical expected shortfall: the mean of the worst (1 - alpha) share of returns, as a positive loss.
+
+    Uses the fractional weight on the boundary observation (Rockafellar and Uryasev 2002), so it is exact for
+    any sample size rather than rounding the tail count."""
+    x = np.sort(np.asarray(returns, float))
+    if x.size == 0 or not np.isfinite(x).all() or not 0 < alpha < 1:
+        raise ValueError('cvar needs finite returns and 0 < alpha < 1')
+    k = (1 - alpha) * x.size
+    n = int(math.floor(k))
+    tail = x[:n].sum() + (k - n) * (x[n] if n < x.size else 0.0)
+    return float(-tail / k)
+
+
 def trial_correlation_by_regime(returns_matrix, proxy, stress_quantile=0.10, min_rows=10):
     """Average pairwise trial correlation in stress weeks (proxy at or below its stress_quantile) and in the rest.
 

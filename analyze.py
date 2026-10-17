@@ -73,6 +73,7 @@ def metrics(run):
     return {
         'cagr': nav_end ** (1 / run['years']) - 1,
         'vol': float(r.std(ddof=1) * math.sqrt(52)),
+        'cvar95_weekly': S.cvar(r, 0.95),
         'sharpe': float(S.sharpe(ex) * math.sqrt(52)),
         'ce': ce(ex),
         'maxdd': mdd, 'maxdd_from': peak_d, 'maxdd_to': trough_d, 'longest_underwater_days': under,
@@ -151,12 +152,12 @@ def write_report(s, ids):
     L.append('')
     L.append('## All configurations')
     L.append('')
-    L.append('| Configuration | CAGR | Vol | Max DD | CE | Sharpe | Turnover | CE gain vs base (95% CI) | DSR |')
-    L.append('|---|---:|---:|---:|---:|---:|---:|---|---:|')
+    L.append('| Configuration | CAGR | Vol | Weekly CVaR 95% | Max DD | CE | Sharpe | Turnover | CE gain vs base (95% CI) | DSR |')
+    L.append('|---|---:|---:|---:|---:|---:|---:|---:|---|---:|')
     for k in sorted(ids, key=lambda k: -c[k]['ce']):
         x = c[k]
         gain = '' if k == 'base' else '%+.1f (%+.1f to %+.1f)' % (x['ce_gain_vs_base'] * 100, x['ce_gain_ci95'][0] * 100, x['ce_gain_ci95'][1] * 100)
-        L.append('| %s | %s | %s | %s | %s | %.2f | %s | %s | %.2f |' % (x['label'], pct(x['cagr']), pct(x['vol']), pct(x['maxdd']), pct(x['ce']), x['sharpe'], pct(x['turnover'], 0), gain, x['dsr_total']))
+        L.append('| %s | %s | %s | %s | %s | %s | %.2f | %s | %s | %.2f |' % (x['label'], pct(x['cagr']), pct(x['vol']), pct(x['cvar95_weekly']), pct(x['maxdd']), pct(x['ce']), x['sharpe'], pct(x['turnover'], 0), gain, x['dsr_total']))
     L.append('')
     L.append('CE is the certainty-equivalent return: annual mean excess return over T-bills minus 1.5 times its annual variance. Turnover is one-way. DSR is the probability that the true Sharpe ratio beats what the best of %d unskilled configurations would show by luck; 0.95 or higher would count as significant. Against zero it is close to 1 for every row, because every configuration earned a high Sharpe ratio in a strong market; it says the period was good, not that any rule worked. The active test below is the one that matters.' % s['trials'])
     L.append('')

@@ -1,0 +1,200 @@
+{
+ "engine": "Zobiris Lagebild v3.1",
+ "start": "2021-02-05",
+ "end": "2026-10-09",
+ "decisions": 297,
+ "configs": [
+  {
+   "id": "base",
+   "label": "Base plan, band rebalance",
+   "opts": {
+    "signals": false,
+    "macro": false,
+    "monthlyGate": false,
+    "cryptoCap": false,
+    "volCap": false,
+    "smoothing": false
+   }
+  },
+  {
+   "id": "base_gate10",
+   "label": "Base + BTC gate (10 months)",
+   "opts": {
+    "signals": false,
+    "macro": false,
+    "monthlyGate": true,
+    "cryptoCap": false,
+    "volCap": false,
+    "smoothing": false
+   }
+  },
+  {
+   "id": "base_gate8",
+   "label": "Base + BTC gate (8 months)",
+   "opts": {
+    "signals": false,
+    "macro": false,
+    "monthlyGate": true,
+    "cryptoCap": false,
+    "volCap": false,
+    "smoothing": false
+   },
+   "params": {
+    "gateMonths": 8
+   }
+  },
+  {
+   "id": "base_gate12",
+   "label": "Base + BTC gate (12 months)",
+   "opts": {
+    "signals": false,
+    "macro": false,
+    "monthlyGate": true,
+    "cryptoCap": false,
+    "volCap": false,
+    "smoothing": false
+   },
+   "params": {
+    "gateMonths": 12
+   }
+  },
+  {
+   "id": "gate_caps",
+   "label": "Base + gate + risk caps, no tilts",
+   "opts": {
+    "signals": false,
+    "macro": false,
+    "monthlyGate": true,
+    "cryptoCap": true,
+    "volCap": true,
+    "smoothing": false
+   }
+  },
+  {
+   "id": "v3",
+   "label": "v3 default",
+   "opts": {}
+  },
+  {
+   "id": "v3_dd",
+   "label": "v3 + drawdown overlay",
+   "opts": {
+    "ddOverlay": true
+   }
+  },
+  {
+   "id": "v3_alt",
+   "label": "v3 + alt trend gate",
+   "opts": {
+    "altGate": true
+   }
+  },
+  {
+   "id": "v3_graded",
+   "label": "v3 + trend-distance gate",
+   "opts": {
+    "gradedGate": true
+   }
+  },
+  {
+   "id": "v3_all",
+   "label": "v3 + all three switches",
+   "opts": {
+    "ddOverlay": true,
+    "altGate": true,
+    "gradedGate": true
+   }
+  },
+  {
+   "id": "v3_nomacro",
+   "label": "v3 without macro",
+   "opts": {
+    "macro": false
+   }
+  },
+  {
+   "id": "v3_macro40",
+   "label": "v3, macro at 0.4",
+   "opts": {
+    "macroWeight": 0.4
+   }
+  },
+  {
+   "id": "v3_k04",
+   "label": "v3, tilt strength 0.4",
+   "opts": {},
+   "params": {
+    "kappa": 0.4
+   }
+  },
+  {
+   "id": "v3_k06",
+   "label": "v3, tilt strength 0.6",
+   "opts": {},
+   "params": {
+    "kappa": 0.6
+   }
+  },
+  {
+   "id": "v3_nosmooth",
+   "label": "v3 without smoothing",
+   "opts": {
+    "smoothing": false
+   }
+  },
+  {
+   "id": "v3_novol",
+   "label": "v3 without volatility ceiling",
+   "opts": {
+    "volCap": false
+   }
+  },
+  {
+   "id": "v3_nocrypto",
+   "label": "v3 without crypto risk cap",
+   "opts": {
+    "cryptoCap": false
+   }
+  },
+  {
+   "id": "v3_nocaps",
+   "label": "v3 without either risk cap",
+   "opts": {
+    "volCap": false,
+    "cryptoCap": false
+   }
+  },
+  {
+   "id": "v3_nogate",
+   "label": "v3 without BTC gate",
+   "opts": {
+    "monthlyGate": false
+   }
+  },
+  {
+   "id": "v3_gate8",
+   "label": "v3, gate 8 months",
+   "opts": {},
+   "params": {
+    "gateMonths": 8
+   }
+  },
+  {
+   "id": "v3_gate12",
+   "label": "v3, gate 12 months",
+   "opts": {},
+   "params": {
+    "gateMonths": 12
+   }
+  },
+  {
+   "id": "tilts_only",
+   "label": "Tilts only, no gate or caps",
+   "opts": {
+    "monthlyGate": false,
+    "volCap": false,
+    "cryptoCap": false
+   }
+  }
+ ]
+}

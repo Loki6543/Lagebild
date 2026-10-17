@@ -43,6 +43,15 @@ def test_pbo_is_near_half_for_pure_noise():
     assert 0.3 < pbo < 0.7
 
 
+def test_pbo_refuses_too_few_rows():
+    m = np.random.default_rng(3).normal(0, 0.01, (12, 5))
+    try:
+        S.pbo_cscv(m, n_blocks=16)
+    except ValueError:
+        return
+    raise AssertionError('pbo_cscv must not return a value when rows < 2 * n_blocks')
+
+
 def test_pbo_is_near_zero_when_one_strategy_truly_dominates():
     rng = np.random.default_rng(4)
     m = rng.normal(0, 0.02, (320, 20))

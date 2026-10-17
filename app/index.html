@@ -1258,7 +1258,7 @@ shown only: 63-day sample,
     if (opts.smoothing && prev && prev.preRaw && prev.asOf) {
       var age = (new Date(nowISO) - new Date(prev.asOf.slice(0, 10))) / 864e5;
       var flip = (prev.gates && prev.gates.btc && prev.gates.btc.on !== gates.btc.on) || (prev.gates && prev.gates.graded && prev.gates.graded.level !== gates.graded.level);
-      if (age <= PARAMS.smoothDays && !flip) { SYMS.forEach(function (s) { pre[s] = PARAMS.smooth * raw[s] + (1 - PARAMS.smooth) * (prev.preRaw[s] || 0); }); smoothed = true; }
+      if (age >= 3 && age <= PARAMS.smoothDays && !flip) { SYMS.forEach(function (s) { pre[s] = PARAMS.smooth * raw[s] + (1 - PARAMS.smooth) * (prev.preRaw[s] || 0); }); smoothed = true; }
     }
     var p = projectSleeves(pre);
 

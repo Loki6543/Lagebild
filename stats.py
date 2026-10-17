@@ -60,6 +60,10 @@ def pbo_cscv(returns_matrix, n_blocks=16, metric=sharpe):
     """Probability that the in-sample best configuration ranks below the out-of-sample median."""
     m = np.asarray(returns_matrix, float)
     t, n = m.shape
+    if n < 2 or n_blocks < 2 or n_blocks % 2 or t < 2 * n_blocks:
+        # Too few rows per block (or trials) leaves the split undefined; refuse instead of returning 1.0.
+        raise ValueError('pbo_cscv needs >= 2 trials, an even n_blocks >= 2 and >= 2 rows per block '
+                         '(got %d rows, %d trials, %d blocks)' % (t, n, n_blocks))
     t_use = t - t % n_blocks
     blocks = np.array_split(m[t - t_use:], n_blocks)
     logits = []

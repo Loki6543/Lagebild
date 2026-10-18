@@ -169,7 +169,15 @@
   function valueAtOrBefore(series, iso) { var v = null; for (var i = 0; i < series.length; i++) { if (series[i].d <= iso) v = series[i].v; else break; } return v; }
   function shiftDays(iso, days) { var d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); }
   function shiftMonths(iso, m) { var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + m); return d.toISOString().slice(0, 10); }
-  function cpiYoY(cpi, iso) { var now = valueAtOrBefore(cpi, iso), then = valueAtOrBefore(cpi, shiftMonths(iso, -12)); return now && then ? (now / then - 1) * 100 : null; }
+  function cpiYoY(cpi, iso) {
+    var cur = null, i; for (i = 0; i < cpi.length; i++) { if (cpi[i].d <= iso) cur = cpi[i]; else break; }
+    if (cur && cur.p) {   // rows carry their observation month: compare with the same month a year earlier, if it was published by iso
+      var want = shiftMonths(cur.p + '-01', -12).slice(0, 7), then = null;
+      for (i = 0; i < cpi.length; i++) if (cpi[i].p === want && cpi[i].d <= iso) then = cpi[i];
+      return then && then.v ? (cur.v / then.v - 1) * 100 : null;
+    }
+    var now = valueAtOrBefore(cpi, iso), prev = valueAtOrBefore(cpi, shiftMonths(iso, -12)); return now && prev ? (now / prev - 1) * 100 : null;
+  }
   function pctField(x) { if (x == null) return null; var v = parseFloat(String(x).replace(/[+%\s]/g, '')); return isNum(v) ? v : null; }
   function erf(x) { var t = 1 / (1 + 0.3275911 * Math.abs(x)); var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; }
   function Phi(x) { return 0.5 * (1 + erf(x / Math.SQRT2)); }

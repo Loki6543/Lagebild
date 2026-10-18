@@ -281,7 +281,8 @@ test('trades follow the engine\'s action band: |target - current| > max(bandAbs,
 
 test('a failing solver holds, trades nothing and is counted', () => {
   const cx = ZE.ASSETS.filter(a => a.kind === 'cx').reduce((t, a) => t + a.base, 0);
-  const buildCost = 0.001 * (100 - cx) / 100 + 0.005 * cx / 100;   // ETFs and stocks at 0.10 %, crypto at 0.50 %, charged once when the base plan is seeded
+  const f = 0.001 * (100 - cx) / 100 + 0.005 * cx / 100;   // ETFs and stocks at 0.10 %, crypto at 0.50 %, charged once when the base plan is seeded
+  const buildCost = f / (1 + f);                              // positions are sized after their fees, so the build spends exactly the starting cash
   const all = failRun('all');
   assert.equal(all.minCvar.solved, 0); assert.equal(all.minCvar.held, all.weekly.length);
   assert.equal(all.blockedWeeks, all.weekly.length); assert.equal(all.statusCount.invalid, all.weekly.length); assert.equal(all.statusCount.valid, 0);

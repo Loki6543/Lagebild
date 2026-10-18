@@ -6,8 +6,11 @@ Every series is stored with the date it became knowable, so the replay can slice
   DGS10, DFII10 observation date + 1 day
   DTB3          observation date (only used to accrue cash, never as a signal)
   Fed funds     monthly average of DFF, known on the 1st of the next month
-  CPI (NSA)     known on the 15th of the next month; the NSA series is never revised,
-                so its current values equal what was published at the time
+  CPI (NSA)     known on its BLS release date where recorded in CPI_RELEASED, else on the 25th
+                of the next month, which is no earlier than any 2018-2026 release (they ran
+                the 10th-24th; October 2025 was never published). Each row keeps its
+                observation month so year-on-year compares months, not release spacing.
+                Unadjusted CPI-U is ordinarily final when published.
 
 Prices are split-adjusted closes from Twelve Data. A separate total-return index adds
 dividends (Alpha Vantage) on their ex-dates; the engine sees prices, the P&L uses total return.
@@ -57,6 +60,14 @@ def next_month(iso, day):
     d = dt.date.fromisoformat(iso)
     y, m = (d.year + 1, 1) if d.month == 12 else (d.year, d.month + 1)
     return dt.date(y, m, day).isoformat()
+
+
+# BLS release dates that are known exactly; others fall back to the conservative 25th
+CPI_RELEASED = {'2025-09': '2025-10-24'}
+
+
+def cpi_available(obs):
+    return CPI_RELEASED.get(obs[:7], next_month(obs, 25))
 
 
 def splice_iaum(iaum, gld):
@@ -111,7 +122,7 @@ def main():
     ff = [(next_month(m + '-01', 1), round(sum(v) / len(v), 4)) for m, v in sorted(months.items())]
     # the current month's average is not complete until it ends
     ff = [x for x in ff if x[0] <= shift(dff[-1][0], 1)]
-    cpi = [(next_month(d, 15), v) for d, v in read_fred('CPIAUCNS')]
+    cpi = [(cpi_available(d), v, d[:7]) for d, v in read_fred('CPIAUCNS')]
     panel = {
         'built': dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'),
         'assets': EQ + CX,
@@ -121,7 +132,7 @@ def main():
             'tsy10': [[shift(d, 1), v] for d, v in read_fred('DGS10') if d >= '2018-01-01'],
             'real': [[shift(d, 1), v] for d, v in read_fred('DFII10') if d >= '2018-01-01'],
             'ff': [[d, v] for d, v in ff if d >= '2018-01-01'],
-            'cpi': [[d, v] for d, v in cpi],
+            'cpi': [[d, v, p] for d, v, p in cpi],
         },
         'tbill': [[d, v] for d, v in read_fred('DTB3') if d >= '2019-01-01'],
     }

@@ -64,7 +64,7 @@ const CONFIGS = [
 ];
 
 /* ---------- data access ---------- */
-function series(rows) { return { d: rows.map(r => r[0]), v: rows.map(r => r[1]) }; }
+function series(rows) { const s = { d: rows.map(r => r[0]), v: rows.map(r => r[1]) }; if (rows.length && rows[0].length > 2) s.p = rows.map(r => r[2]); return s; }
 function upto(s, iso) { let lo = 0, hi = s.d.length; while (lo < hi) { const m = (lo + hi) >> 1; if (s.d[m] <= iso) lo = m + 1; else hi = m; } return lo; } // count of entries <= iso
 const PX = {}, TR = {};
 ALL.forEach(s => { PX[s] = series(P.px[s]); TR[s] = series(P.tr[s]); });
@@ -85,7 +85,7 @@ function threeDay(s, iso, n) {
   }
   return bars.slice(-n);
 }
-function macroAt(iso) { const o = {}; Object.keys(MAC).forEach(k => { const s = MAC[k], n = upto(s, iso); const out = []; for (let i = 0; i < n; i++) out.push({ d: s.d[i], v: s.v[i] }); o[k] = out; }); return o; }
+function macroAt(iso) { const o = {}; Object.keys(MAC).forEach(k => { const s = MAC[k], n = upto(s, iso); const out = []; for (let i = 0; i < n; i++) out.push(s.p ? { d: s.d[i], v: s.v[i], p: s.p[i] } : { d: s.d[i], v: s.v[i] }); o[k] = out; }); return o; }
 function engineInput(fri, holdings) {
   const cxCut = dayBefore(fri), inp = { now: fri + 'T21:00:00Z', prices: {}, cryptoLong: {}, macro: macroAt(fri) };
   EQ.forEach(s => { inp.prices[s] = lastN(PX[s], fri, 260); });
@@ -132,10 +132,13 @@ function run(cfg) {
   Object.assign(ZE.PARAMS, JSON.parse(JSON.stringify(DEFAULT_PARAMS)), cfg.params || {});
   const opts = Object.assign({ shadows: false }, cfg.opts);
   const iStart = DATES.indexOf(DECISIONS[0]) + 1;          // first execution day
-  const val = {}; let cash = 0, nav = 1, turnover = 0, costPaid = 0, cashIdx = 1;
+  const val = {}; let cash = 0, nav = 1, turnover = 0, costPaid = 0, cashIdx = 1, minCash = 0;
   const seed = DATES[iStart];
-  ALL.forEach(s => { val[s] = BASE[s] / 100; });
-  ALL.forEach(s => { const c = Math.abs(val[s]) * (CX.includes(s) ? COST.cx : COST.eq); costPaid += c; cash -= c; });
+  // the first portfolio is bought from all cash: size each position after its fee so cash ends at zero, not below
+  const feeOf = s => CX.includes(s) ? COST.cx : COST.eq;
+  const k0 = 1 / ALL.reduce((t, s) => t + BASE[s] / 100 * (1 + feeOf(s)), 0);
+  ALL.forEach(s => { val[s] = BASE[s] / 100 * k0; const c = val[s] * feeOf(s); costPaid += c; });
+  cash = 1 - ALL.reduce((t, s) => t + val[s] * (1 + feeOf(s)), 0); minCash = cash;
   turnover += 0.5;   // building the first portfolio counts as half a one-way turn, the same for every configuration
   let prevRun = null, pending = null, blocked = 0, statusCount = { valid: 0, degraded: 0, invalid: 0 };
   const daily = [], weekly = [], weights = [];
@@ -150,15 +153,17 @@ function run(cfg) {
     }
     if (pending) {      // execute last Friday's decision at this close
       nav = cash + ALL.reduce((t, s) => t + val[s], 0);
+      // sells fund buys after their own fees; buys are scaled so they and their fees fit the cash (never borrow)
       const tgt = {}; let add = 0, free = cash;
-      ALL.forEach(s => { if (pending[s] == null) return; tgt[s] = pending[s] / 100 * nav; const dv = tgt[s] - val[s]; if (dv > 0) add += dv; else free -= dv; });
-      const scale = add > free && add > 0 ? Math.max(0, free) / add : 1;   // never borrow to fund additions
+      ALL.forEach(s => { if (pending[s] == null) return; tgt[s] = pending[s] / 100 * nav; const dv = tgt[s] - val[s]; if (dv > 0) add += dv * (1 + feeOf(s)); else free += -dv * (1 - feeOf(s)); });
+      const scale = add > free && add > 0 ? Math.max(0, free) / add : 1;
       ALL.forEach(s => {
         if (tgt[s] == null) return; let dv = tgt[s] - val[s]; if (dv > 0) dv *= scale;
         const c = Math.abs(dv) * (CX.includes(s) ? COST.cx : COST.eq);
         val[s] += dv; cash -= dv + c; costPaid += c; turnover += Math.abs(dv) / nav / 2;
       });
       pending = null;
+      if (cash < minCash) minCash = cash;
     }
     nav = cash + ALL.reduce((t, s) => t + val[s], 0);
     daily.push([d, nav]);
@@ -197,7 +202,7 @@ function run(cfg) {
   }
   const years = (Date.parse(daily[daily.length - 1][0]) - Date.parse(daily[0][0])) / (365.25 * 864e5);
   const out = { id: cfg.id, label: cfg.label, opts: cfg.opts, params: cfg.params || {}, engine: ZE.VERSION, start: daily[0][0], end: daily[daily.length - 1][0],
-    years: years, turnoverOneWayPerYear: turnover / years, costPaid: costPaid, blockedWeeks: blocked, statusCount: statusCount,
+    years: years, turnoverOneWayPerYear: turnover / years, costPaid: costPaid, minCash: minCash, blockedWeeks: blocked, statusCount: statusCount,
     weekly: weekly, daily: daily, weights: weights };
   if (mc) {   // audit trail for the challenger only: every decision's target, current holdings, trades and solver status
     out.minCvar = { alpha: cfg.minCvar.alpha, window: cfg.minCvar.window, solved: mc.solved, held: mc.held, byStatus: mc.byStatus, firstSolved: mc.first, limits: mc.limits, symbols: ALL };

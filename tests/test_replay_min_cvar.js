@@ -154,7 +154,44 @@ function baselineSource() {
   if (r.status !== 0) { const h = show('HEAD'); if (h.status === 0 && !h.stdout.includes('min_cvar')) r = h; }   // HEAD is the baseline until this change is committed
   return r.status === 0 ? r.stdout : null;
 }
-const BASELINE = baselineSource();
+// The later point-in-time commit changed the replay's cash accounting (fees funded, never borrow) and kept CPI
+// observation months. The same edits are applied to the reference here, so "unchanged" still means: adding
+// min_cvar changed nothing else. Each edit must apply exactly once, or the reference is refused.
+const ACCOUNTING_EDITS = [
+ [
+  "function series(rows) { return { d: rows.map(r => r[0]), v: rows.map(r => r[1]) }; }",
+  "function series(rows) { const s = { d: rows.map(r => r[0]), v: rows.map(r => r[1]) }; if (rows.length && rows[0].length > 2) s.p = rows.map(r => r[2]); return s; }"
+ ],
+ [
+  "for (let i = 0; i < n; i++) out.push({ d: s.d[i], v: s.v[i] }); o[k] = out;",
+  "for (let i = 0; i < n; i++) out.push(s.p ? { d: s.d[i], v: s.v[i], p: s.p[i] } : { d: s.d[i], v: s.v[i] }); o[k] = out;"
+ ],
+ [
+  "let cash = 0, nav = 1, turnover = 0, costPaid = 0, cashIdx = 1;",
+  "let cash = 0, nav = 1, turnover = 0, costPaid = 0, cashIdx = 1, minCash = 0;"
+ ],
+ [
+  "  ALL.forEach(s => { val[s] = BASE[s] / 100; });\n  ALL.forEach(s => { const c = Math.abs(val[s]) * (CX.includes(s) ? COST.cx : COST.eq); costPaid += c; cash -= c; });",
+  "  // the first portfolio is bought from all cash: size each position after its fee so cash ends at zero, not below\n  const feeOf = s => CX.includes(s) ? COST.cx : COST.eq;\n  const k0 = 1 / ALL.reduce((t, s) => t + BASE[s] / 100 * (1 + feeOf(s)), 0);\n  ALL.forEach(s => { val[s] = BASE[s] / 100 * k0; const c = val[s] * feeOf(s); costPaid += c; });\n  cash = 1 - ALL.reduce((t, s) => t + val[s] * (1 + feeOf(s)), 0); minCash = cash;"
+ ],
+ [
+  "      const tgt = {}; let add = 0, free = cash;\n      ALL.forEach(s => { if (pending[s] == null) return; tgt[s] = pending[s] / 100 * nav; const dv = tgt[s] - val[s]; if (dv > 0) add += dv; else free -= dv; });\n      const scale = add > free && add > 0 ? Math.max(0, free) / add : 1;   // never borrow to fund additions",
+  "      // sells fund buys after their own fees; buys are scaled so they and their fees fit the cash (never borrow)\n      const tgt = {}; let add = 0, free = cash;\n      ALL.forEach(s => { if (pending[s] == null) return; tgt[s] = pending[s] / 100 * nav; const dv = tgt[s] - val[s]; if (dv > 0) add += dv * (1 + feeOf(s)); else free += -dv * (1 - feeOf(s)); });\n      const scale = add > free && add > 0 ? Math.max(0, free) / add : 1;"
+ ],
+ [
+  "        val[s] += dv; cash -= dv + c; costPaid += c; turnover += Math.abs(dv) / nav / 2;\n      });\n      pending = null;",
+  "        val[s] += dv; cash -= dv + c; costPaid += c; turnover += Math.abs(dv) / nav / 2;\n      });\n      pending = null;\n      if (cash < minCash) minCash = cash;"
+ ],
+ [
+  "costPaid: costPaid, blockedWeeks",
+  "costPaid: costPaid, minCash: minCash, blockedWeeks"
+ ]
+];
+function withAccountingEdits(src) {
+  for (const [a, b] of ACCOUNTING_EDITS) { if (src.split(a).length !== 2) return null; src = src.replace(a, () => b); }
+  return src;
+}
+const BASELINE = (s => s && withAccountingEdits(s))(baselineSource());
 const baselineRun = () => once('baseline', () => {
   const dir = tree('baseline_tree', BASELINE, false);
   node(['run_replay.js'].concat(COMPARE), { cwd: dir });
